@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="NeoClinic.Api/NeoClinic.Api.csproj" />
+  <Project Path="NeoClinic.Application/NeoClinic.Application.csproj" />
+  <Project Path="NeoClinic.Domain/NeoClinic.Domain.csproj" />
+  <Project Path="NeoClinic.Infrostructure/NeoClinic.Infrostructure.csproj" />
+</Solution>
