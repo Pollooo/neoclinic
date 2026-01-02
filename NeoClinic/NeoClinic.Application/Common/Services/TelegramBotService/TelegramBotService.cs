@@ -7,7 +7,6 @@ public class TelegramBotService : ITelegramBotService
 {
     public Task<bool> NotifyAboutAppointmentCreationAsync(CreateAppointmentRequest appointmentRequest)
     {
-
         throw new NotImplementedException();
     }
 
