@@ -12,11 +12,13 @@ public class TelegramBotService : ITelegramBotService
 
     public Task NotifyAboutErrorAsync(string error, string? handler)
     {
+
         throw new NotImplementedException();
     }
 
     public Task NotifyEveryoneAboutLogin()
     {
+
         throw new NotImplementedException();
     }
 }
