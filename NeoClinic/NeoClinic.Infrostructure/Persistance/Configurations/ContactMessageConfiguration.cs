@@ -21,6 +21,9 @@ public class ContactMessageConfiguration : IEntityTypeConfiguration<ContactMessa
         builder.Property(x => x.PhoneNumber)
             .HasMaxLength(20);
 
+        builder.Property(x => x.AdditionalPhoneNumber)
+            .HasMaxLength(20);
+
         builder.Property(x => x.TelegramChatUrl)
             .HasMaxLength(300);
 
