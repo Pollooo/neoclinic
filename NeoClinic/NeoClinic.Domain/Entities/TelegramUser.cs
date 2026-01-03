@@ -12,5 +12,6 @@ public class TelegramUser
     public bool IsVarified { get; set; } = true;
     public bool IsBotBlocked { get; set; } = false;
     public bool IsAdmin { get; set; } = false;
+    public Admin? Admin { get; set; }
     public DateTime SubscribedAt { get; set; } = DateTime.UtcNow;
 }

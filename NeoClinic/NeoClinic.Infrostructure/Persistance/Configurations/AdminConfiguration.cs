@@ -8,7 +8,7 @@ public class AdminConfiguration : IEntityTypeConfiguration<Admin>
 {
     public void Configure(EntityTypeBuilder<Admin> builder)
     {
-        builder.ToTable("Admins");
+        builder.ToTable("Admins", "clinic");
 
         builder.HasKey(x => x.Id);
 
@@ -21,5 +21,10 @@ public class AdminConfiguration : IEntityTypeConfiguration<Admin>
 
         builder.Property(x => x.PasswordHash)
             .IsRequired();
+
+        builder.HasOne(x => x.TelegramUser)
+            .WithOne(t => t.Admin)
+            .HasForeignKey<Admin>(x => x.TelegramUserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
