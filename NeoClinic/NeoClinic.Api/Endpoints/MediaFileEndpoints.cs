@@ -14,9 +14,10 @@ public static class MediaFileEndpoints
     {
         app.MapPost($"{GroupName}/upload", UploadMediaFileAsync)
            .Accepts<IFormFile>("multipart/form-data")
+           .DisableAntiforgery()
            .RequireAuthorization("AdminPolicy");
 
-        app.MapDelete($"{GroupName}/{{fileId:guid}}", DeleteMediaFileAsync)
+        app.MapDelete($"{GroupName}/delete/{{fileId:guid}}", DeleteMediaFileAsync)
            .RequireAuthorization("AdminPolicy");
 
         app.MapGet($"{GroupName}/get", GetMediaFilesAsync);

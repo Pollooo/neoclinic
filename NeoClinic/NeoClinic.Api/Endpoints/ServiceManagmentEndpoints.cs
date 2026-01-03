@@ -13,9 +13,10 @@ public static class ServiceManagmentEndpoints
     public static void MapServiceEndpoints(this WebApplication app)
     {
         app.MapPost($"{GroupName}/create", CreateServiceAsync)
-           .RequireAuthorization("AdminPolicy");
+           .RequireAuthorization("AdminPolicy")
+           .DisableAntiforgery();
 
-        app.MapDelete($"{GroupName}/{{serviceId:guid}}", DeleteServiceAsync)
+        app.MapDelete($"{GroupName}/delete/{{serviceId:guid}}", DeleteServiceAsync)
            .RequireAuthorization("AdminPolicy");
 
         app.MapGet($"{GroupName}/get", GetServicesAsync);

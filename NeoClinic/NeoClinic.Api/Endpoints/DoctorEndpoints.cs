@@ -13,8 +13,9 @@ public static class DoctorEndpoints
     {
         app.MapPost($"{GroupName}/create", CreateDoctorAsync)
              .Accepts<IFormFile>("multipart/form-data")
+             .DisableAntiforgery()
              .RequireAuthorization("AdminPolicy");
-        app.MapDelete($"{GroupName}/{{doctorId:guid}}", DeleteDoctorAsync)
+        app.MapDelete($"{GroupName}/delete/{{doctorId:guid}}", DeleteDoctorAsync)
             .RequireAuthorization("AdminPolicy");
         app.MapGet($"{GroupName}/get", GetDoctorsAsync);
     }
