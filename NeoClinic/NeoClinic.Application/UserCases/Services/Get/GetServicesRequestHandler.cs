@@ -1,0 +1,21 @@
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using NeoClinic.Application.Common.Interfaces;
+
+namespace NeoClinic.Application.UserCases.Services.Get;
+
+public class GetServicesRequestHandler(
+    IApplicationDbContext context)
+    : IRequestHandler<GetServicesRequest, List<GetServicesResponse>>
+{
+    public async Task<List<GetServicesResponse>> Handle(GetServicesRequest request, CancellationToken cancellationToken)
+    {
+        return await context.Services.Select(
+            s => new GetServicesResponse(
+                s.Id,
+                s.Name,
+                s.Description,
+                s.Price))
+            .ToListAsync(cancellationToken);
+    }
+}

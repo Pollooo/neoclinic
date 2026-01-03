@@ -18,9 +18,4 @@
     <ProjectReference Include="..\NeoClinic.Domain\NeoClinic.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UserCases\MediaFiles\Delete\" />
-    <Folder Include="UserCases\MediaFiles\Retrieve\" />
-  </ItemGroup>
-
 </Project>
