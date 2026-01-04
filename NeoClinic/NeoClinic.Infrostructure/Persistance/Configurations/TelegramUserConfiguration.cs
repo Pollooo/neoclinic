@@ -13,5 +13,10 @@ public class TelegramUserConfiguration : IEntityTypeConfiguration<TelegramUser>
         builder.HasKey(tu => tu.Id);
         builder.Property(tu => tu.Id)
             .ValueGeneratedOnAdd();
+
+        builder.Property(tu => tu.Language)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
     }
 }

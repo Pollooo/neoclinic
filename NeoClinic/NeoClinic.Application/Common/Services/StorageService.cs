@@ -1,27 +1,49 @@
-﻿using NeoClinic.Application.Common.Interfaces;
+﻿using Azure.Storage.Blobs;
+using Microsoft.Extensions.Configuration;
+using NeoClinic.Application.Common.Interfaces;
 using NeoClinic.Domain.Enums;
 
 namespace NeoClinic.Application.Common.Services;
 
 public class StorageService : IStorageService
 {
-    public Task<bool> DeleteFileAsync(string blobName)
+    private readonly BlobContainerClient Container;
+
+    public StorageService(IConfiguration configuration)
     {
-        throw new NotImplementedException();
+        var connectionString = configuration["AzureBlob:ConnectionString"];
+        var containerName = configuration["AzureBlob:ContainerName"];
+
+        var serviceClient = new BlobServiceClient(connectionString);
+        Container = serviceClient.GetBlobContainerClient(containerName);
+        Container.CreateIfNotExists();
     }
 
-    public string GenerateBlobName(MediaType mediaType, string fileName)
+    public async Task<string> UploadFileAsync(string blobName, Stream content)
     {
-        throw new NotImplementedException();
+        var blobClient = Container.GetBlobClient(blobName);
+        await blobClient.UploadAsync(content, overwrite: true);
+        return blobClient.Uri.ToString();
+    }
+
+    public async Task<bool> DeleteFileAsync(string blobName)
+    {
+        var blobClient = Container.GetBlobClient(blobName);
+        var response = await blobClient.DeleteIfExistsAsync();
+        return response.Value;
     }
 
     public Task<string> GetPublicUrl(string blobName)
     {
-        throw new NotImplementedException();
+        var blobClient = Container.GetBlobClient(blobName);
+        return Task.FromResult(blobClient.Uri.ToString());
     }
 
-    public Task<string> UploadFileAsync(string blobName, Stream content)
+    public string GenerateBlobName(MediaType mediaType, string fileName)
     {
-        throw new NotImplementedException();
+        var extension = Path.GetExtension(fileName);
+        var uniqueName = $"{Guid.NewGuid():N}{extension}";
+        var folder = mediaType == MediaType.Image ? "images" : "videos";
+        return $"{folder}/{uniqueName}";
     }
 }

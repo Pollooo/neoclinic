@@ -5,6 +5,6 @@ namespace NeoClinic.Application.Common.Interfaces;
 public interface ITelegramBotService
 {
     Task<bool> NotifyAboutAppointmentCreationAsync(CreateAppointmentRequest appointmentRequest);
-    Task NotifyEveryoneAboutLogin();
+    Task NotifyEveryoneAboutLogin(string userName);
     Task NotifyAboutErrorAsync(string error, string? handler);
 }

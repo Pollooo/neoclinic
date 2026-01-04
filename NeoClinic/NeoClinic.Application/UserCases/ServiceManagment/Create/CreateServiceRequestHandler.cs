@@ -13,8 +13,10 @@ public class CreateServiceRequestHandler(
     {
         var service = new Service()
         {
-            Name = request.Name,
-            Description = request.Description,
+            NameUz = request.NameUz,
+            DescriptionUz = request.DescriptionUz,
+            NameRu = request.NameRu,
+            DescriptionRu = request.DescriptionRu,
             Price = request.Price,
         };
 

@@ -7,8 +7,10 @@ using NeoClinic.Application.Common.Behaviours;
 using NeoClinic.Application.Common.Interfaces;
 using NeoClinic.Application.Common.Services;
 using NeoClinic.Application.Common.Services.TelegramBotService;
+using NeoClinic.Application.Common.Services.TelegramBotService.UpdateHandler;
 using System.Reflection;
 using System.Text;
+using Telegram.Bot;
 
 namespace NeoClinic.Application;
 
@@ -23,6 +25,13 @@ public static class DependencyInjection
         });
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        services.AddSingleton<ITelegramBotClient>(sp =>
+         {
+             var config = sp.GetRequiredService<IConfiguration>();
+             return new TelegramBotClient(config["Telegram:BotToken"]!);
+         });
+        services.AddSingleton<TelegramBotReceiver>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -48,6 +57,8 @@ public static class DependencyInjection
         services.AddScoped<IStorageService, StorageService>();
         services.AddScoped<ITelegramBotService, TelegramBotService>();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ICommandHandler, CommandHandler>();
+        services.AddScoped<ICallbackHandler, CallbackHandler>();
 
         return services;
     }

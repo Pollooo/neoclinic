@@ -3,7 +3,9 @@
 namespace NeoClinic.Application.UserCases.Services.Create;
 
 public record CreateServiceRequest(
-    string Name,
-    string? Description,
+    string NameUz,
+    string? DescriptionUz,
+    string NameRu,
+    string? DescriptionRu,
     decimal? Price)
     : IRequest<bool>;

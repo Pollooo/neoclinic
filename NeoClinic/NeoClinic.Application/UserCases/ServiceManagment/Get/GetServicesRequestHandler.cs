@@ -13,8 +13,10 @@ public class GetServicesRequestHandler(
         return await context.Services.Select(
             s => new GetServicesResponse(
                 s.Id,
-                s.Name,
-                s.Description,
+                s.NameUz,
+                s.DescriptionUz,
+                s.NameRu,
+                s.DescriptionRu,
                 s.Price))
             .ToListAsync(cancellationToken);
     }
