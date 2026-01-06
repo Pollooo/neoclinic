@@ -22,13 +22,15 @@ public class UploadMediaFileRequestHandler(
             FileName = fileName,
             BlobName = blobName,
             FileSizeInBytes = request.File.Length,
-            FileDescription = request.FileDescription,
+            FileDescriptionRu = request.FileDescriptionRu,
+            FileDescriptionUz = request.FileDescriptionUz,
             FileUrl = fileUrl,
             ContainerName = "neo-clinic-docs",
             ContentType = request.File.ContentType,
             IsDoctor = true,
             Type = request.Type,
-            AltText = request.AltText,
+            AltTextUz = request.AltTextUz,
+            AltTextRu = request.AltTextRu,
         };
 
         await context.MediaFiles.AddAsync(document, cancellationToken);

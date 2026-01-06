@@ -13,10 +13,13 @@ public class GetDoctorsRequestHandler(
         return await context.Doctors.Select(
             d => new GetDoctorsResponse(
                 d.Id,
-                d.FullName,
-                d.Specialty,
-                d.PhotoUrl,
-                d.Bio))
+                d.FullNameUz,
+                d.SpecialtyUz,
+                d.BioUz,
+                d.FullNameRu,
+                d.SpecialtyRu,
+                d.BioRu,
+                d.PhotoUrl))
             .ToListAsync(cancellationToken);
     }
 }

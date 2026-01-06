@@ -12,5 +12,6 @@ public record UpdateContactMessageRequest(
     string? InstagramUrl,
     string? FacebookUrl,
     string? LocationUrl,
-    string? AboutClinic)
+    string? AboutClinicUz,
+    string? AboutClinicRu)
     : IRequest<bool>;

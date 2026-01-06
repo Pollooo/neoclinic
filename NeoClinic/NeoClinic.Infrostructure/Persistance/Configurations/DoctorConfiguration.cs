@@ -13,15 +13,26 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.FullName)
+        builder.Property(x => x.FullNameRu)
+            .IsRequired()
+            .HasMaxLength(100);
+        builder.Property(x => x.FullNameUz)
             .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(x => x.Specialty)
+        builder.Property(x => x.SpecialtyUz)
             .IsRequired(false)
             .HasMaxLength(100);
 
-        builder.Property(x => x.Bio)
+        builder.Property(x => x.BioUz)
+            .IsRequired(false)
+            .HasMaxLength(500);
+
+        builder.Property(x => x.SpecialtyRu)
+            .IsRequired(false)
+            .HasMaxLength(100);
+
+        builder.Property(x => x.BioRu)
             .IsRequired(false)
             .HasMaxLength(500);
     }

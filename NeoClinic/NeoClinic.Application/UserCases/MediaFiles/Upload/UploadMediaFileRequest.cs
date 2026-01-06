@@ -5,9 +5,10 @@ using NeoClinic.Domain.Enums;
 namespace NeoClinic.Application.UserCases.MediaFiles.Upload;
 
 public record UploadMediaFileRequest(
-    string FileName,
-    string FileDescription,
-    string? AltText,
+    string? FileDescriptionUz,
+    string? FileDescriptionRu,
+    string? AltTextUz,
+    string? AltTextRu,
     MediaType Type,
     IFormFile File)
     : IRequest<bool>;

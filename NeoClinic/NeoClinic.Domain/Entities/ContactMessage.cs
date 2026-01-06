@@ -12,6 +12,7 @@ public class ContactMessage
     public string? InstagramUrl { get; set; }
     public string? FacebookUrl { get; set; }
     public string? LocationUrl { get; set; }
-    public string? AboutClinic { get; set; }
+    public string? AboutClinicUz { get; set; }
+    public string? AboutClinicRu { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

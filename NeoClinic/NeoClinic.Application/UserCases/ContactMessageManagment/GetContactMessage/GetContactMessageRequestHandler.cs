@@ -20,7 +20,8 @@ public class GetContactMessageRequestHandler(
             cm.InstagramUrl,
             cm.FacebookUrl,
             cm.LocationUrl,
-            cm.AboutClinic)
+            cm.AboutClinicUz,
+            cm.AboutClinicRu)
         ).FirstOrDefaultAsync(cancellationToken);
     }
 }

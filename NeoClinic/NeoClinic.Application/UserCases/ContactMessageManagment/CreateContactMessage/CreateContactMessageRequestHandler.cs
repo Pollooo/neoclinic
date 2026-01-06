@@ -27,7 +27,8 @@ public class CreateContactMessageRequestHandler(
             InstagramUrl = request.InstagramUrl,
             FacebookUrl = request.FacebookUrl,
             LocationUrl = request.LocationUrl,
-            AboutClinic = request.AboutClinic,
+            AboutClinicUz = request.AboutClinicUz,
+            AboutClinicRu = request.AboutClinicRu,
         };
 
         await context.ContactMessages.AddAsync(contactMessageEntity, cancellationToken);

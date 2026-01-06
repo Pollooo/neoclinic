@@ -39,7 +39,10 @@ public class ContactMessageConfiguration : IEntityTypeConfiguration<ContactMessa
         builder.Property(x => x.LocationUrl)
             .HasMaxLength(300);
 
-        builder.Property(x => x.AboutClinic)
+        builder.Property(x => x.AboutClinicUz)
+            .HasMaxLength(2000);
+
+        builder.Property(x => x.AboutClinicRu)
             .HasMaxLength(2000);
 
         builder.Property(x => x.CreatedAt)

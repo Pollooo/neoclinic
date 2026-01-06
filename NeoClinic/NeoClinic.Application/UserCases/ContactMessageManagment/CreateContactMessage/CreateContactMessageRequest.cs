@@ -12,5 +12,6 @@ public record CreateContactMessageRequest(
     string? InstagramUrl,
     string? FacebookUrl,
     string? LocationUrl,
-    string? AboutClinic)
+    string? AboutClinicUz,
+    string? AboutClinicRu)
     : IRequest<bool>;

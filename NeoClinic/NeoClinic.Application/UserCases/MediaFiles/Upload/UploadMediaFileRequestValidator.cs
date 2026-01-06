@@ -11,16 +11,19 @@ public class UploadMediaFileRequestValidator : AbstractValidator<UploadMediaFile
 
     public UploadMediaFileRequestValidator()
     {
-        RuleFor(x => x.FileName)
-            .NotEmpty().WithMessage("File name is required.")
-            .MaximumLength(200).WithMessage("File name must not exceed 200 characters.");
+        RuleFor(x => x.FileDescriptionUz)
+            .NotEmpty().WithMessage("Fayl tavsifi majburiy.")
+            .MaximumLength(1000).WithMessage("Fayl tavsifi 1000 ta belgidan oshmasligi kerak.");
 
-        RuleFor(x => x.FileDescription)
-            .NotEmpty().WithMessage("File description is required.")
-            .MaximumLength(1000).WithMessage("File description must not exceed 1000 characters.");
+        RuleFor(x => x.AltTextUz)
+            .MaximumLength(300).WithMessage("Alt matn 300 ta belgidan oshmasligi kerak.");
 
-        RuleFor(x => x.AltText)
-            .MaximumLength(300).WithMessage("Alt text must not exceed 300 characters.");
+        RuleFor(x => x.FileDescriptionRu)
+            .NotEmpty().WithMessage("Описание файла обязательно.")
+            .MaximumLength(1000).WithMessage("Описание файла не должно превышать 1000 символов.");
+
+        RuleFor(x => x.AltTextRu)
+            .MaximumLength(300).WithMessage("Alt-текст не должен превышать 300 символов.");
 
         RuleFor(x => x.Type)
             .IsInEnum().WithMessage("Invalid media type.");

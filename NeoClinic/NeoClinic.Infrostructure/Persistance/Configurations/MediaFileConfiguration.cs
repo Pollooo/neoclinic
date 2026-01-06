@@ -20,7 +20,7 @@ public class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
             .IsRequired()
             .HasMaxLength(1000);
 
-        builder.Property(x => x.AltText)
+        builder.Property(x => x.AltTextUz)
             .HasMaxLength(300);
 
         builder.Property(x => x.Type)

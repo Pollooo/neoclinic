@@ -11,11 +11,14 @@ public class CreateDoctorRequestValidator : AbstractValidator<CreateDoctorReques
 
     public CreateDoctorRequestValidator()
     {
-        RuleFor(x => x.FullName).NotEmpty();
-        RuleFor(x => x.Specialty).NotEmpty();
-        RuleFor(x => x.Bio).NotEmpty();
+        RuleFor(x => x.FullNameRu).NotEmpty();
+        RuleFor(x => x.SpecialtyRu).NotEmpty();
+        RuleFor(x => x.BioRu).NotEmpty();
 
-        // Photo is now mandatory
+        RuleFor(x => x.FullNameUz).NotEmpty();
+        RuleFor(x => x.SpecialtyUz).NotEmpty();
+        RuleFor(x => x.BioUz).NotEmpty();
+
         RuleFor(x => x.Photo)
             .NotNull()
             .Must(f => AllowedExtensions.Contains(Path.GetExtension(f.FileName)))

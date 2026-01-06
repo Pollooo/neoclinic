@@ -12,8 +12,10 @@ public class GetMediaFilesRequestHandler(
         return await context.MediaFiles.Select(
             f => new GetMediaFilesResponse(
                 f.Id,
-                f.FileName,
-                f.FileDescription,
+                f.FileDescriptionUz,
+                f.FileDescriptionRu,
+                f.AltTextUz,
+                f.AltTextRu,
                 f.FileUrl,
                 f.ContentType,
                 f.Type))

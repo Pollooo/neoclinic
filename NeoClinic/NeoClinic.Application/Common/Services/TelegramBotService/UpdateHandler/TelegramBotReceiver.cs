@@ -61,7 +61,7 @@ public class TelegramBotReceiver(ITelegramBotClient bot, IServiceProvider servic
             );
     }
 
-    private async Task HandleCallback(CallbackQuery query, ICallbackHandler callbackHandler)
+    private static async Task HandleCallback(CallbackQuery query, ICallbackHandler callbackHandler)
     {
         if (query.Data!.StartsWith("lang_"))
             await callbackHandler.HandleLanguageSelectionAsync(query);

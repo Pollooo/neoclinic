@@ -10,4 +10,5 @@ public record GetContactMessageResponse(
     string? InstagramUrl,
     string? FacebookUrl,
     string? LocationUrl,
-    string? AboutClinic);
+    string? AboutClinicUz,
+    string? AboutClinicRu);

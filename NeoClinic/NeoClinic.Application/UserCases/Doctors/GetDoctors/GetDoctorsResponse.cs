@@ -2,7 +2,10 @@
 
 public record GetDoctorsResponse(
     Guid DoctorId,
-    string FullName,
-    string? Specialty,
-    string? PhotoUrl,
-    string? Bio);
+    string FullNameUz,
+    string? SpecialtyUz,
+    string? BioUz,
+    string FullNameRu,
+    string? SpecialtyRu,
+    string? BioRu,
+    string? PhotoUrl);

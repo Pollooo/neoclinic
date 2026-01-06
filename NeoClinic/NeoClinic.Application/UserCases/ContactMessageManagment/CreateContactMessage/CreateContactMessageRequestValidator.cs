@@ -35,7 +35,10 @@ public class CreateContactMessageRequestValidator : AbstractValidator<CreateCont
         RuleFor(x => x.LocationUrl)
             .MaximumLength(300);
 
-        RuleFor(x => x.AboutClinic)
+        RuleFor(x => x.AboutClinicUz)
+            .MaximumLength(2000);
+
+        RuleFor(x => x.AboutClinicRu)
             .MaximumLength(2000);
 
         RuleFor(x => x)

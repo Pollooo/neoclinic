@@ -8,7 +8,7 @@ namespace NeoClinic.Api.Endpoints;
 
 public static class ContactMessageEndpoints
 {
-    private const string GroupName = "api/contact-message";
+    private const string GroupName = "api/contact-messages";
 
     public static void MapContactMessageEndpoints(this WebApplication app)
     {

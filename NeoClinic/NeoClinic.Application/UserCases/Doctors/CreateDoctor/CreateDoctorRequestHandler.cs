@@ -20,9 +20,12 @@ public class CreateDoctorRequestHandler(
 
         var doctor = new Doctor()
         {
-            FullName = request.FullName,
-            Bio = request.Bio,
-            Specialty = request.Specialty,
+            FullNameUz = request.FullNameUz,
+            SpecialtyUz = request.SpecialtyUz,
+            BioUz = request.BioUz,
+            FullNameRu = request.FullNameRu,
+            SpecialtyRu = request.SpecialtyRu,
+            BioRu = request.BioRu,
             PhotoUrl = photeUrl,
             BlobName = blobName,
         };
@@ -32,7 +35,7 @@ public class CreateDoctorRequestHandler(
             FileName = fileName,
             BlobName = blobName,
             FileSizeInBytes = request.Photo.Length,
-            FileDescription = "Photo of a doctor",
+            FileDescriptionUz = "Photo of a doctor",
             FileUrl = photeUrl,
             ContainerName = "neo-clinic-docs",
             ContentType = request.Photo.ContentType,

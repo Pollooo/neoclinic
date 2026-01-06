@@ -27,7 +27,8 @@ public class UpdateContactMessageRequestHandler(
         contactMessage.InstagramUrl = request.InstagramUrl ?? contactMessage.InstagramUrl;
         contactMessage.FacebookUrl = request.FacebookUrl ?? contactMessage.FacebookUrl;
         contactMessage.LocationUrl = request.LocationUrl ?? contactMessage.LocationUrl;
-        contactMessage.AboutClinic = request.AboutClinic ?? contactMessage.AboutClinic;
+        contactMessage.AboutClinicUz = request.AboutClinicUz ?? contactMessage.AboutClinicUz;
+        contactMessage.AboutClinicRu= request.AboutClinicRu ?? contactMessage.AboutClinicRu;
 
         context.ContactMessages.Update(contactMessage);
         if (await context.SaveChangesAsync(cancellationToken) > 0)
