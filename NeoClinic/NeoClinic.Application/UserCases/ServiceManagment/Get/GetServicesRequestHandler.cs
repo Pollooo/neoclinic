@@ -10,7 +10,8 @@ public class GetServicesRequestHandler(
 {
     public async Task<List<GetServicesResponse>> Handle(GetServicesRequest request, CancellationToken cancellationToken)
     {
-        return await context.Services.Select(
+        return await context.Services
+            .Where(f => !request.ServiceId.HasValue || request.ServiceId == f.Id).Select(
             s => new GetServicesResponse(
                 s.Id,
                 s.NameUz,

@@ -10,7 +10,8 @@ public class GetDoctorsRequestHandler(
 {
     public async Task<List<GetDoctorsResponse>> Handle(GetDoctorsRequest request, CancellationToken cancellationToken)
     {
-        return await context.Doctors.Select(
+        return await context.Doctors
+            .Where(f => !request.DoctorId.HasValue || request.DoctorId == f.Id).Select(
             d => new GetDoctorsResponse(
                 d.Id,
                 d.FullNameUz,

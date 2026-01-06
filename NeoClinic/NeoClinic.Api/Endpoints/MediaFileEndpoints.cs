@@ -20,7 +20,7 @@ public static class MediaFileEndpoints
         app.MapDelete($"{GroupName}/delete/{{fileId:guid}}", DeleteMediaFileAsync)
            .RequireAuthorization("AdminPolicy");
 
-        app.MapGet($"{GroupName}/get", GetMediaFilesAsync);
+        app.MapGet($"{GroupName}/get/{{fileId:guid}}", GetMediaFilesAsync);
     }
 
     private static async Task<IResult> UploadMediaFileAsync(
@@ -40,9 +40,9 @@ public static class MediaFileEndpoints
         return result ? Results.Ok(true) : Results.BadRequest(false);
     }
 
-    private static async Task<IResult> GetMediaFilesAsync(ISender sender)
+    private static async Task<IResult> GetMediaFilesAsync(Guid? fileId, ISender sender)
     {
-        var result = await sender.Send(new GetMediaFilesRequest());
+        var result = await sender.Send(new GetMediaFilesRequest(fileId));
         return Results.Ok(result);
     }
 }

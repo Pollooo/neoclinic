@@ -1,0 +1,96 @@
+<div class="appointment-page">
+  <div class="container">
+    <div class="appointment-card">
+      <h1 class="title">{{ translationService.t('appointment.title') }}</h1>
+      
+      <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="form">
+        <div class="form-group">
+          <label class="label">{{ translationService.t('appointment.fullName') }} *</label>
+          <input 
+            type="text" 
+            formControlName="fullName" 
+            class="input"
+            [class.error]="appointmentForm.get('fullName')?.invalid && appointmentForm.get('fullName')?.touched"
+          />
+          @if (appointmentForm.get('fullName')?.invalid && appointmentForm.get('fullName')?.touched) {
+            <span class="error-message">
+              {{ translationService.currentLanguage() === 'uz' ? 'Ism-familiyani kiriting' : 'Введите ФИО' }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="label">{{ translationService.t('appointment.phoneNumber') }} *</label>
+          <input 
+            type="tel" 
+            formControlName="phoneNumber" 
+            class="input"
+            placeholder="+998 XX XXX-XX-XX"
+            [class.error]="appointmentForm.get('phoneNumber')?.invalid && appointmentForm.get('phoneNumber')?.touched"
+          />
+          @if (appointmentForm.get('phoneNumber')?.invalid && appointmentForm.get('phoneNumber')?.touched) {
+            <span class="error-message">
+              {{ translationService.currentLanguage() === 'uz' ? 'Telefon raqamni kiriting' : 'Введите номер телефона' }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="label">{{ translationService.t('appointment.selectDoctor') }}</label>
+          <select formControlName="doctorId" class="input">
+            <option value="">{{ translationService.currentLanguage() === 'uz' ? 'Shifokorni tanlang' : 'Выберите врача' }}</option>
+            @for (doctor of doctors(); track doctor.DoctorId) {
+              <option [value]="doctor.DoctorId">{{ getDoctorName(doctor) }} - {{ getDoctorSpecialty(doctor) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="label">{{ translationService.t('appointment.selectDate') }} *</label>
+          <input 
+            type="datetime-local" 
+            formControlName="appointmentDate" 
+            class="input"
+            [class.error]="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched"
+          />
+          @if (appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched) {
+            <span class="error-message">
+              {{ translationService.currentLanguage() === 'uz' ? 'Sanani tanlang' : 'Выберите дату' }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="label">{{ translationService.t('appointment.description') }}</label>
+          <textarea 
+            formControlName="description" 
+            class="input textarea"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="appointmentForm.invalid || submitting()"
+          >
+            @if (submitting()) {
+              {{ translationService.t('common.loading') }}
+            } @else {
+              {{ translationService.t('common.submit') }}
+            }
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-secondary"
+            (click)="router.navigate(['/'])"
+          >
+            {{ translationService.t('common.cancel') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

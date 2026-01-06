@@ -1,0 +1,84 @@
+<div class="gallery-page">
+  <div class="container">
+    <h1 class="page-title">{{ translationService.t('common.gallery') }}</h1>
+    
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button 
+        class="tab" 
+        [class.active]="activeFilter() === 'all'"
+        (click)="setFilter('all')"
+      >
+        {{ translationService.currentLanguage() === 'uz' ? 'Barchasi' : 'Все' }}
+      </button>
+      <button 
+        class="tab" 
+        [class.active]="activeFilter() === MediaType.Image"
+        (click)="setFilter(MediaType.Image)"
+      >
+        {{ translationService.currentLanguage() === 'uz' ? 'Rasmlar' : 'Фото' }}
+      </button>
+      <button 
+        class="tab" 
+        [class.active]="activeFilter() === MediaType.Video"
+        (click)="setFilter(MediaType.Video)"
+      >
+        {{ translationService.currentLanguage() === 'uz' ? 'Videolar' : 'Видео' }}
+      </button>
+    </div>
+    
+    @if (loading()) {
+      <div class="loading">{{ translationService.t('common.loading') }}</div>
+    } @else if (filteredMedia().length > 0) {
+      <div class="gallery-grid">
+        @for (media of filteredMedia(); track media.FileId) {
+          <div class="media-item" (click)="openLightbox(media)">
+            @if (media.Type === MediaType.Image.toString()) {
+              <img [src]="getMediaUrl(media.FileUrl)" [alt]="translationService.currentLanguage() === 'uz' ? media.AltTextUz : media.AltTextRu" class="media-image" />
+              <div class="media-overlay">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
+                </svg>
+              </div>
+            } @else if (media.Type === MediaType.Video.toString()) {
+              <div class="video-thumbnail">
+                <video [src]="getMediaUrl(media.FileUrl)" class="media-video"></video>
+                <div class="play-button">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+        <p>{{ translationService.t('common.noData') }}</p>
+      </div>
+    }
+  </div>
+  
+  <!-- Lightbox -->
+  @if (selectedMedia()) {
+    <div class="lightbox" (click)="closeLightbox()">
+      <button class="lightbox-close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="lightbox-content" (click)="$event.stopPropagation()">
+        @if (selectedMedia()!.Type === MediaType.Image.toString()) {
+          <img [src]="getMediaUrl(selectedMedia()!.FileUrl)" [alt]="translationService.currentLanguage() === 'uz' ? selectedMedia()!.AltTextUz : selectedMedia()!.AltTextRu" />
+        } @else if (selectedMedia()!.Type === MediaType.Video.toString()) {
+          <video [src]="getMediaUrl(selectedMedia()!.FileUrl)" controls autoplay></video>
+        }
+      </div>
+    </div>
+  }
+</div>
+

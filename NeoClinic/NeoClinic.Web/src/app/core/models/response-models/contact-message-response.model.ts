@@ -1,4 +1,5 @@
 export interface GetContactMessageResponse {
+    Id?: string;
     Name?: string;
     Email?: string;
     PhoneNumber?: string;
@@ -8,5 +9,6 @@ export interface GetContactMessageResponse {
     InstagramUrl?: string;
     FacebookUrl?: string;
     LocationUrl?: string;
-    AboutClinic?: string;
+    AboutClinicUz?: string;
+    AboutClinicRu?: string;
 }

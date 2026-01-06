@@ -13,17 +13,16 @@ public static class ServiceManagmentEndpoints
     public static void MapServiceEndpoints(this WebApplication app)
     {
         app.MapPost($"{GroupName}/create", CreateServiceAsync)
-           .RequireAuthorization("AdminPolicy")
-           .DisableAntiforgery();
+           .RequireAuthorization("AdminPolicy");
 
         app.MapDelete($"{GroupName}/delete/{{serviceId:guid}}", DeleteServiceAsync)
            .RequireAuthorization("AdminPolicy");
 
-        app.MapGet($"{GroupName}/get", GetServicesAsync);
+        app.MapGet($"{GroupName}/get/{{serviceId:guid}}", GetServicesAsync);
     }
 
     private static async Task<IResult> CreateServiceAsync(
-        [FromForm] CreateServiceRequest request,
+        CreateServiceRequest request,
         ISender sender)
     {
         var result = await sender.Send(request);
@@ -39,9 +38,9 @@ public static class ServiceManagmentEndpoints
         return result ? Results.Ok(true) : Results.BadRequest(false);
     }
 
-    private static async Task<IResult> GetServicesAsync(ISender sender)
+    private static async Task<IResult> GetServicesAsync(Guid? serviceId, ISender sender)
     {
-        var result = await sender.Send(new GetServicesRequest());
+        var result = await sender.Send(new GetServicesRequest(serviceId));
         return Results.Ok(result);
     }
 }

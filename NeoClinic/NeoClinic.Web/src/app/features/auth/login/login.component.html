@@ -1,0 +1,79 @@
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="brand-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+          </svg>
+        </div>
+        <h1 class="title">{{ translationService.t('admin.loginTitle') }}</h1>
+        <p class="subtitle">NeoClinic Admin</p>
+      </div>
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
+        <div class="form-group">
+          <label class="label">{{ translationService.t('admin.username') }}</label>
+          <input 
+            type="text" 
+            formControlName="username" 
+            class="input"
+            [class.error]="isFieldInvalid('username')"
+            placeholder="{{ translationService.currentLanguage() === 'uz' ? 'Foydalanuvchi nomini kiriting' : 'Введите имя пользователя' }}"
+          />
+          @if (isFieldInvalid('username')) {
+            <span class="error-message">
+              {{ translationService.currentLanguage() === 'uz' ? 'Foydalanuvchi nomini kiriting' : 'Введите имя пользователя' }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="label">{{ translationService.t('admin.password') }}</label>
+          <input 
+            type="password" 
+            formControlName="password" 
+            class="input"
+            [class.error]="isFieldInvalid('password')"
+            placeholder="{{ translationService.currentLanguage() === 'uz' ? 'Parolni kiriting' : 'Введите пароль' }}"
+          />
+          @if (isFieldInvalid('password')) {
+            <span class="error-message">
+              {{ translationService.currentLanguage() === 'uz' ? 'Parolni kiriting' : 'Введите пароль' }}
+            </span>
+          }
+        </div>
+
+        @if (loginForm.invalid && !submitting()) {
+          <p class="form-hint">
+            {{ translationService.currentLanguage() === 'uz' 
+              ? 'Kirish tugmasini bosish uchun barcha maydonlarni to\'ldiring' 
+              : 'Заполните все поля, чтобы нажать кнопку входа' }}
+          </p>
+        }
+
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="loginForm.invalid || submitting()"
+        >
+          @if (submitting()) {
+            {{ translationService.t('common.loading') }}
+          } @else {
+            {{ translationService.t('admin.loginButton') }}
+          }
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <a href="/" class="back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          {{ translationService.currentLanguage() === 'uz' ? 'Bosh sahifaga qaytish' : 'Вернуться на главную' }}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+

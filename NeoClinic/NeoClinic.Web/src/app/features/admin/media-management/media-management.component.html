@@ -1,0 +1,150 @@
+<div class="media-management">
+  <div class="header">
+    <h1 class="page-title">{{ translationService.t('admin.mediaFiles') }}</h1>
+    <button class="btn btn-primary" (click)="openUploadMode()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+      </svg>
+      {{ translationService.currentLanguage() === 'uz' ? 'Yuklash' : 'Загрузить' }}
+    </button>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button 
+      class="tab" 
+      [class.active]="activeFilter() === 'all'"
+      (click)="setFilter('all')"
+    >
+      {{ translationService.currentLanguage() === 'uz' ? 'Barchasi' : 'Все' }} ({{ media().length }})
+    </button>
+    <button 
+      class="tab" 
+      [class.active]="activeFilter() === MediaType.Image"
+      (click)="setFilter(MediaType.Image)"
+    >
+      {{ translationService.currentLanguage() === 'uz' ? 'Rasmlar' : 'Фото' }} ({{ getImageCount() }})
+    </button>
+    <button 
+      class="tab" 
+      [class.active]="activeFilter() === MediaType.Video"
+      (click)="setFilter(MediaType.Video)"
+    >
+      {{ translationService.currentLanguage() === 'uz' ? 'Videolar' : 'Видео' }} ({{ getVideoCount() }})
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">{{ translationService.t('common.loading') }}</div>
+  } @else if (filteredMedia().length > 0) {
+    <div class="media-grid">
+      @for (mediaItem of filteredMedia(); track mediaItem.FileId) {
+        <div class="media-card">
+          <div class="media-preview">
+            @if (mediaItem.Type === MediaType.Image.toString()) {
+              <img [src]="getMediaUrl(mediaItem.FileUrl)" [alt]="getAltText(mediaItem)" class="media-image" />
+            } @else if (mediaItem.Type === MediaType.Video.toString()) {
+              <video [src]="getMediaUrl(mediaItem.FileUrl)" class="media-video"></video>
+              <div class="video-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            }
+          </div>
+          <div class="media-info">
+            <p class="media-filename">{{ getFileName(mediaItem) }}</p>
+            @if (getAltText(mediaItem)) {
+              <p class="media-alt">{{ getAltText(mediaItem) }}</p>
+            }
+            @if (getFileDescription(mediaItem)) {
+              <p class="media-description">{{ getFileDescription(mediaItem) }}</p>
+            }
+          </div>
+          <button class="btn-delete" (click)="deleteMedia(mediaItem.FileId)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+          </button>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+      </svg>
+      <p>{{ translationService.t('common.noData') }}</p>
+    </div>
+  }
+
+  <!-- Upload Modal -->
+  @if (isUploadMode()) {
+    <div class="modal-overlay" (click)="cancelUpload()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ translationService.currentLanguage() === 'uz' ? 'Media yuklash' : 'Загрузить медиа' }}</h2>
+          <button class="modal-close" (click)="cancelUpload()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form [formGroup]="mediaForm" (ngSubmit)="uploadMedia()" class="modal-form">
+          <div class="form-group">
+            <label>{{ translationService.currentLanguage() === 'uz' ? 'Fayl' : 'Файл' }}</label>
+            <input type="file" accept="image/*,video/*" (change)="onFileSelected($event)" class="input-file" />
+            @if (selectedFile()) {
+              <span class="file-name">{{ selectedFile()!.name }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>{{ translationService.currentLanguage() === 'uz' ? 'Turi' : 'Тип' }}</label>
+            <select formControlName="type" class="input">
+              <option [value]="MediaType.Image">{{ translationService.currentLanguage() === 'uz' ? 'Rasm' : 'Изображение' }}</option>
+              <option [value]="MediaType.Video">{{ translationService.currentLanguage() === 'uz' ? 'Video' : 'Видео' }}</option>
+            </select>
+          </div>
+
+          <div class="form-section">
+            <h3>O'zbekcha / Uzbek</h3>
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'Tavsif' : 'Описание' }}</label>
+              <textarea formControlName="fileDescriptionUz" class="input" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Alt Text</label>
+              <input type="text" formControlName="altTextUz" class="input" />
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Русский / Russian</h3>
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'Tavsif' : 'Описание' }}</label>
+              <textarea formControlName="fileDescriptionRu" class="input" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Alt Text</label>
+              <input type="text" formControlName="altTextRu" class="input" />
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cancelUpload()">
+              {{ translationService.t('common.cancel') }}
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="mediaForm.invalid || submitting()">
+              {{ submitting() ? translationService.t('common.loading') : translationService.currentLanguage() === 'uz' ? 'Yuklash' : 'Загрузить' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
+

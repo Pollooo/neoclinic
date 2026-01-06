@@ -10,7 +10,8 @@ public class GetContactMessageRequestHandler(
 {
     public async Task<GetContactMessageResponse?> Handle(GetContactMessageRequest request, CancellationToken cancellationToken)
     {
-        return await context.ContactMessages.Select(cm => new GetContactMessageResponse(
+        return await context.ContactMessages
+            .Select(cm => new GetContactMessageResponse(
             cm.Name,
             cm.Email,
             cm.PhoneNumber,

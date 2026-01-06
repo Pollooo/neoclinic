@@ -26,12 +26,12 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        services.AddSingleton<ITelegramBotClient>(sp =>
+        services.AddScoped<ITelegramBotClient>(sp =>
          {
              var config = sp.GetRequiredService<IConfiguration>();
              return new TelegramBotClient(config["Telegram:BotToken"]!);
          });
-        services.AddSingleton<TelegramBotReceiver>();
+        services.AddScoped<TelegramBotReceiver>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>

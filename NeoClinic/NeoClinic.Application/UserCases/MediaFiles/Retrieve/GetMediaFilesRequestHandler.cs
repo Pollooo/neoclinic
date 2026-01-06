@@ -9,7 +9,8 @@ public class GetMediaFilesRequestHandler(
 {
     public async Task<List<GetMediaFilesResponse>> Handle(GetMediaFilesRequest request, CancellationToken cancellationToken)
     {
-        return await context.MediaFiles.Select(
+        return await context.MediaFiles
+            .Where(f => !request.MediaFileId.HasValue || request.MediaFileId == f.Id).Select(
             f => new GetMediaFilesResponse(
                 f.Id,
                 f.FileDescriptionUz,

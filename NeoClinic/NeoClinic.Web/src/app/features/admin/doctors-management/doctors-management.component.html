@@ -1,0 +1,120 @@
+<div class="doctors-management">
+  <div class="header">
+    <h1 class="page-title">{{ translationService.t('admin.doctorsManagement') }}</h1>
+    <button class="btn btn-primary" (click)="openCreateMode()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      {{ translationService.t('common.create') }}
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">{{ translationService.t('common.loading') }}</div>
+  } @else if (doctors().length > 0) {
+    <div class="doctors-grid">
+      @for (doctor of doctors(); track doctor.DoctorId) {
+        <div class="doctor-card">
+          @if (doctor.PhotoUrl) {
+            <img [src]="doctor.PhotoUrl" [alt]="getDoctorName(doctor)" class="doctor-photo" />
+          } @else {
+            <div class="doctor-photo-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+          }
+          <div class="doctor-info">
+            <h3>{{ getDoctorName(doctor) }}</h3>
+            <p class="doctor-specialty">{{ getDoctorSpecialty(doctor) }}</p>
+            <p class="doctor-bio">{{ getDoctorBio(doctor) }}</p>
+          </div>
+          <button class="btn-delete" (click)="deleteDoctor(doctor.DoctorId)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+          </button>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+      </svg>
+      <p>{{ translationService.t('common.noData') }}</p>
+    </div>
+  }
+
+  <!-- Create Modal -->
+  @if (isCreateMode()) {
+    <div class="modal-overlay" (click)="cancelCreate()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ translationService.currentLanguage() === 'uz' ? 'Shifokor qo\'shish' : 'Добавить врача' }}</h2>
+          <button class="modal-close" (click)="cancelCreate()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form [formGroup]="doctorForm" (ngSubmit)="saveDoctor()" class="modal-form">
+          <div class="form-section">
+            <h3>O'zbekcha / Uzbek</h3>
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'To\'liq ism' : 'Полное имя' }}</label>
+              <input type="text" formControlName="fullNameUz" class="input" />
+            </div>
+
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'Mutaxassislik' : 'Специализация' }}</label>
+              <input type="text" formControlName="specialtyUz" class="input" />
+            </div>
+
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'Biografiya' : 'Биография' }}</label>
+              <textarea formControlName="bioUz" class="input" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Русский / Russian</h3>
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'To\'liq ism' : 'Полное имя' }}</label>
+              <input type="text" formControlName="fullNameRu" class="input" />
+            </div>
+
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'Mutaxassislik' : 'Специализация' }}</label>
+              <input type="text" formControlName="specialtyRu" class="input" />
+            </div>
+
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'Biografiya' : 'Биография' }}</label>
+              <textarea formControlName="bioRu" class="input" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>{{ translationService.currentLanguage() === 'uz' ? 'Rasm' : 'Фото' }}</label>
+            <input type="file" accept="image/*" (change)="onFileSelected($event)" class="input-file" />
+            @if (selectedFile()) {
+              <span class="file-name">{{ selectedFile()!.name }}</span>
+            }
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cancelCreate()">
+              {{ translationService.t('common.cancel') }}
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="doctorForm.invalid || submitting()">
+              {{ submitting() ? translationService.t('common.loading') : translationService.t('common.save') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
+

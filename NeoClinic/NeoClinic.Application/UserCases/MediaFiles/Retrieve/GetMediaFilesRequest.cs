@@ -2,4 +2,4 @@
 
 namespace NeoClinic.Application.UserCases.MediaFiles.Retrieve;
 
-public record GetMediaFilesRequest() : IRequest<List<GetMediaFilesResponse>>;
+public record GetMediaFilesRequest(Guid? MediaFileId) : IRequest<List<GetMediaFilesResponse>>;

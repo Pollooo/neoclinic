@@ -17,7 +17,7 @@ public static class DoctorEndpoints
              .RequireAuthorization("AdminPolicy");
         app.MapDelete($"{GroupName}/delete/{{doctorId:guid}}", DeleteDoctorAsync)
             .RequireAuthorization("AdminPolicy");
-        app.MapGet($"{GroupName}/get", GetDoctorsAsync);
+        app.MapGet($"{GroupName}/get/{{doctorId:guid}}", GetDoctorsAsync);
     }
 
     private static async Task<IResult> CreateDoctorAsync(
@@ -37,9 +37,9 @@ public static class DoctorEndpoints
         return result ? Results.Ok(true) : Results.BadRequest(false);
     }
 
-    private static async Task<IResult> GetDoctorsAsync(ISender sender)
+    private static async Task<IResult> GetDoctorsAsync(Guid? doctorId, ISender sender)
     {
-        var result = await sender.Send(new GetDoctorsRequest());
+        var result = await sender.Send(new GetDoctorsRequest(doctorId));
         return Results.Ok(result);
     }
 }

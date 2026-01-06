@@ -2,4 +2,4 @@
 
 namespace NeoClinic.Application.UserCases.Services.Get;
 
-public record GetServicesRequest() : IRequest<List<GetServicesResponse>>;
+public record GetServicesRequest(Guid? ServiceId) : IRequest<List<GetServicesResponse>>;

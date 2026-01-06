@@ -2,4 +2,4 @@
 
 namespace NeoClinic.Application.UserCases.Doctors.GetDoctors;
 
-public record GetDoctorsRequest() : IRequest<List<GetDoctorsResponse>>;
+public record GetDoctorsRequest(Guid? DoctorId) : IRequest<List<GetDoctorsResponse>>;
