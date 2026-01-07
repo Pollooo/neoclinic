@@ -6,6 +6,19 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import https from 'node:https';
+
+// Disable SSL certificate validation for development (self-signed certificates)
+// WARNING: Only use this in development environment!
+if (process.env['NODE_ENV'] !== 'production') {
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+  
+  // Configure https agent to accept self-signed certificates
+  const originalAgent = https.globalAgent;
+  https.globalAgent = new https.Agent({
+    rejectUnauthorized: false
+  });
+}
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 

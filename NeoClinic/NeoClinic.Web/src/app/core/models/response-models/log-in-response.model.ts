@@ -1,4 +1,4 @@
 export interface LogInResponse {
-    AccessToken: string;
-    ExpiresAt: Date;
+    accessToken: string;
+    expiresAt: Date;
 }

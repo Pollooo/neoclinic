@@ -4,11 +4,12 @@ import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { NotificationComponent } from '../../shared/components/notification/notification.component';
+import { ContactInfoComponent } from '../../shared/components/contact-info/contact-info.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationComponent, ContactInfoComponent],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.css'
 })

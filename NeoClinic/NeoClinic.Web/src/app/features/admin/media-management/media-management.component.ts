@@ -28,6 +28,9 @@ export class MediaManagementComponent implements OnInit {
   public submitting = signal(false);
   public selectedFile = signal<File | null>(null);
   public activeFilter = signal<MediaType | 'all'>('all');
+  public previewUrl = signal<string | null>(null);
+  public isDragging = signal(false);
+  public selectedMediaForView = signal<GetMediaFilesResponse | null>(null);
 
   public mediaForm!: FormGroup;
 
@@ -63,27 +66,131 @@ export class MediaManagementComponent implements OnInit {
     this.isUploadMode.set(true);
     this.mediaForm.reset({ type: MediaType.Image });
     this.selectedFile.set(null);
+    this.previewUrl.set(null);
   }
 
   public cancelUpload(): void {
     this.isUploadMode.set(false);
     this.mediaForm.reset();
     this.selectedFile.set(null);
+    this.previewUrl.set(null);
   }
 
   public onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.selectedFile.set(file);
+      this.processFile(input.files[0]);
+    }
+  }
 
-      // Auto-detect media type
-      if (file.type.startsWith('video/')) {
-        this.mediaForm.patchValue({ type: MediaType.Video });
-      } else if (file.type.startsWith('image/')) {
-        this.mediaForm.patchValue({ type: MediaType.Image });
+  public onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(true);
+  }
+
+  public onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(false);
+  }
+
+  public onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(false);
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+        this.processFile(file);
+      } else {
+        this.notificationService.showError(
+          this.translationService.currentLanguage() === 'uz' 
+            ? 'Faqat rasm yoki video fayllarini yuklash mumkin' 
+            : 'Можно загружать только изображения или видео'
+        );
       }
     }
+  }
+
+  private processFile(file: File): void {
+    // Validate file type
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      this.notificationService.showError(
+        this.translationService.currentLanguage() === 'uz' 
+          ? 'Faqat rasm yoki video fayllarini yuklash mumkin' 
+          : 'Можно загружать только изображения или видео'
+      );
+      return;
+    }
+
+    // Validate file size (max 50MB for videos, 10MB for images)
+    const maxSize = file.type.startsWith('video/') ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      const maxSizeMB = file.type.startsWith('video/') ? '50MB' : '10MB';
+      this.notificationService.showError(
+        this.translationService.currentLanguage() === 'uz' 
+          ? `Fayl hajmi ${maxSizeMB} dan oshmasligi kerak` 
+          : `Размер файла не должен превышать ${maxSizeMB}`
+      );
+      return;
+    }
+
+    this.selectedFile.set(file);
+
+    // Auto-detect media type
+    if (file.type.startsWith('video/')) {
+      this.mediaForm.patchValue({ type: MediaType.Video });
+    } else if (file.type.startsWith('image/')) {
+      this.mediaForm.patchValue({ type: MediaType.Image });
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.previewUrl.set(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  public removeSelectedFile(): void {
+    this.selectedFile.set(null);
+    this.previewUrl.set(null);
+  }
+
+  public isImage(): boolean {
+    return this.selectedFile()?.type.startsWith('image/') || false;
+  }
+
+  public isVideo(): boolean {
+    return this.selectedFile()?.type.startsWith('video/') || false;
+  }
+
+  public onVideoError(event: Event, mediaItem?: GetMediaFilesResponse): void {
+    const videoElement = event.target as HTMLVideoElement;
+    console.error('Video loading error:', {
+      error: videoElement.error,
+      src: videoElement.currentSrc,
+      readyState: videoElement.readyState,
+      networkState: videoElement.networkState,
+      mediaItem: mediaItem
+    });
+  }
+
+  public onVideoLoaded(event: Event): void {
+    const videoElement = event.target as HTMLVideoElement;
+    videoElement.setAttribute('data-loaded', 'true');
+    console.log('Video loaded successfully:', event);
+  }
+
+  public openMediaLightbox(media: GetMediaFilesResponse): void {
+    this.selectedMediaForView.set(media);
+  }
+
+  public closeMediaLightbox(): void {
+    this.selectedMediaForView.set(null);
   }
 
   public uploadMedia(): void {
@@ -105,12 +212,12 @@ export class MediaManagementComponent implements OnInit {
     const formValue = this.mediaForm.value;
 
     const request = {
-      FileDescriptionUz: formValue.fileDescriptionUz || undefined,
-      FileDescriptionRu: formValue.fileDescriptionRu || undefined,
-      AltTextUz: formValue.altTextUz || undefined,
-      AltTextRu: formValue.altTextRu || undefined,
-      Type: formValue.type,
-      File: this.selectedFile()!
+      fileDescriptionUz: formValue.fileDescriptionUz || undefined,
+      fileDescriptionRu: formValue.fileDescriptionRu || undefined,
+      altTextUz: formValue.altTextUz || undefined,
+      altTextRu: formValue.altTextRu || undefined,
+      type: formValue.type,
+      file: this.selectedFile()!
     };
 
     this.apiService.uploadMediaFileRequest(request).subscribe({
@@ -162,37 +269,38 @@ export class MediaManagementComponent implements OnInit {
     if (this.activeFilter() === 'all') {
       return this.media();
     }
-    return this.media().filter(m => m.Type === this.activeFilter()?.toString());
+    return this.media().filter(m => m.type === this.activeFilter());
   }
 
   public getImageCount(): number {
-    return this.media().filter(m => m.Type === MediaType.Image.toString()).length;
+    return this.media().filter(m => m.type === MediaType.Image).length;
   }
 
   public getVideoCount(): number {
-    return this.media().filter(m => m.Type === MediaType.Video.toString()).length;
+    return this.media().filter(m => m.type === MediaType.Video).length;
   }
 
   public getMediaUrl(fileUrl: string): string {
-    return `${environment.apiBaseUrl}/${fileUrl}`;
+    // fileUrl is already a complete Azure Blob Storage URL
+    return fileUrl;
   }
 
   public getFileName(media: GetMediaFilesResponse): string {
     // Extract filename from URL
-    const parts = media.FileUrl.split('/');
+    const parts = media.fileUrl.split('/');
     return parts[parts.length - 1];
   }
 
   public getAltText(media: GetMediaFilesResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (media.AltTextUz || '') 
-      : (media.AltTextRu || '');
+      ? (media.altTextUz || '') 
+      : (media.altTextRu || '');
   }
 
   public getFileDescription(media: GetMediaFilesResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (media.FileDescriptionUz || '') 
-      : (media.FileDescriptionRu || '');
+      ? (media.fileDescriptionUz || '') 
+      : (media.fileDescriptionRu || '');
   }
 }
 

@@ -18,7 +18,7 @@ public static class ServiceManagmentEndpoints
         app.MapDelete($"{GroupName}/delete/{{serviceId:guid}}", DeleteServiceAsync)
            .RequireAuthorization("AdminPolicy");
 
-        app.MapGet($"{GroupName}/get/{{serviceId:guid}}", GetServicesAsync);
+        app.MapGet($"{GroupName}/get", GetServicesAsync);
     }
 
     private static async Task<IResult> CreateServiceAsync(
@@ -33,9 +33,16 @@ public static class ServiceManagmentEndpoints
         Guid serviceId,
         ISender sender)
     {
-        var request = new DeleteServiceRequest(serviceId);
-        var result = await sender.Send(request);
-        return result ? Results.Ok(true) : Results.BadRequest(false);
+        try
+        {
+            var request = new DeleteServiceRequest(serviceId);
+            var result = await sender.Send(request);
+            return result ? Results.Ok(true) : Results.BadRequest(false);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
     }
 
     private static async Task<IResult> GetServicesAsync(Guid? serviceId, ISender sender)

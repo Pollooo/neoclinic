@@ -40,19 +40,25 @@ public class TelegramBotReceiver(ITelegramBotClient bot, IServiceProvider servic
             await commandHandler.HandleDeleteManagerAsync(message);
         else if (Guid.TryParse(message.Text, out _))
             await commandHandler.HandleSetManagerAsync(message);
-        else if (message.Text == "➕ Add admin")
+        else if (message.Text == "➕ Добавить администратора")
             await commandHandler.HandleAddAdminAsync(message);
-        else if (message.Text == "❌ Remove admin")
+        else if (message.Text == "➕ Admin qo'shish")
+            await commandHandler.HandleAddAdminAsync(message);
+        else if (message.Text == "❌ Удалить администратора")
+            await commandHandler.HandleRemoveAdminAsync(message);
+        else if (message.Text == "❌ Adminni o'chirish")
             await commandHandler.HandleRemoveAdminAsync(message);
         else if (message.Text == "delete admin")
             await commandHandler.HandleDeleteAdminAsync(message);
         else if (long.TryParse(message.Text, out _))
             await commandHandler.HandleSetAdminAsync(message);
-        else if (message.Text == "🌐 Change language")
-            await commandHandler.HandleLanguageChangeRequestAsync(message);
-        else if (message.Text == "📝 Create profile")
+        else if (message.Text == "📝 Создать профиль")
             await commandHandler.HandleCreateProfileAsync(message);
-        else if (message.Text == "📄 Get profile")
+        else if (message.Text == "📝 Profil yaratish")
+            await commandHandler.HandleCreateProfileAsync(message);
+        else if (message.Text == "📄 Получить профиль")
+            await commandHandler.HandleGetProfileAsync(message);
+        else if (message.Text == "📄 Profil olish")
             await commandHandler.HandleGetProfileAsync(message);
         else
             await bot.SendMessage(

@@ -5,7 +5,7 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { ApiService } from '../../../core/services/api.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { GetContactMessageResponse } from '../../../core/models/response-models/contact-message-response.model';
-import { UpdateContactMessageRequest } from '../../../core/models/request-models/contact-message-request.model';
+import { CreateContactMessageRequest, UpdateContactMessageRequest } from '../../../core/models/request-models/contact-message-request.model';
 
 @Component({
   selector: 'app-messages-management',
@@ -20,101 +20,161 @@ export class MessagesManagementComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private formBuilder = inject(FormBuilder);
 
-  public messages = signal<GetContactMessageResponse[]>([]);
+  public contactInfo = signal<GetContactMessageResponse | null>(null);
   public loading = signal(true);
-  public selectedMessage = signal<GetContactMessageResponse | null>(null);
   public isEditMode = signal(false);
+  public isCreateMode = signal(false);
   public submitting = signal(false);
 
-  public messageForm!: FormGroup;
+  public contactForm!: FormGroup;
 
   ngOnInit(): void {
     this.initializeForm();
-    this.loadMessages();
+    this.loadContactInfo();
   }
 
   private initializeForm(): void {
-    this.messageForm = this.formBuilder.group({
-      fullName: ['', [Validators.required]],
+    this.contactForm = this.formBuilder.group({
+      name: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [Validators.required]],
       additionalPhoneNumber: [''],
-      message: ['', [Validators.required]]
+      telegramChatUrl: [''],
+      telegramUrl: [''],
+      instagramUrl: [''],
+      facebookUrl: [''],
+      locationUrl: [''],
+      aboutClinicUz: ['', [Validators.required]],
+      aboutClinicRu: ['', [Validators.required]]
     });
   }
 
-  private loadMessages(): void {
+  private loadContactInfo(): void {
+    this.loading.set(true);
     this.apiService.getContactMessageRequest({}).subscribe({
-      next: (messages) => {
-        this.messages.set(messages);
+      next: (response) => {
+        console.log('Admin contact info received:', response);
+        this.contactInfo.set(response || null);
+        
+        if (response) {
+          this.contactForm.patchValue({
+            name: response.name || '',
+            email: response.email || '',
+            phoneNumber: response.phoneNumber || '',
+            additionalPhoneNumber: response.additionalPhoneNumber || '',
+            telegramChatUrl: response.telegramChatUrl || '',
+            telegramUrl: response.telegramUrl || '',
+            instagramUrl: response.instagramUrl || '',
+            facebookUrl: response.facebookUrl || '',
+            locationUrl: response.locationUrl || '',
+            aboutClinicUz: response.aboutClinicUz || '',
+            aboutClinicRu: response.aboutClinicRu || ''
+          });
+        }
         this.loading.set(false);
       },
       error: (error) => {
+        console.error('Failed to load admin contact info:', error);
         this.notificationService.showError(error.message);
         this.loading.set(false);
       }
     });
   }
 
-  public getMessage(message: GetContactMessageResponse): string {
-    return this.translationService.currentLanguage() === 'uz' 
-      ? (message.AboutClinicUz || '') 
-      : (message.AboutClinicRu || '');
+  public toggleEditMode(): void {
+    this.isEditMode.update(value => !value);
+    if (!this.isEditMode()) {
+      // Reset form to original values
+      this.loadContactInfo();
+    }
   }
 
-  public editMessage(message: GetContactMessageResponse): void {
-    this.selectedMessage.set(message);
-    this.isEditMode.set(true);
-    this.messageForm.patchValue({
-      fullName: message.Name,
-      email: message.Email,
-      phoneNumber: message.PhoneNumber,
-      additionalPhoneNumber: message.AdditionalPhoneNumber || '',
-      message: this.getMessage(message)
-    });
+  public startCreateMode(): void {
+    this.isCreateMode.set(true);
+    this.contactForm.reset();
   }
 
-  public cancelEdit(): void {
-    this.selectedMessage.set(null);
-    this.isEditMode.set(false);
-    this.messageForm.reset();
+  public cancelCreateMode(): void {
+    this.isCreateMode.set(false);
+    this.contactForm.reset();
   }
 
-  public saveMessage(): void {
-    if (this.messageForm.invalid || !this.selectedMessage()) {
+  public saveContactInfo(): void {
+    if (this.contactForm.invalid) {
+      this.contactForm.markAllAsTouched();
       return;
     }
 
     this.submitting.set(true);
-    const formValue = this.messageForm.value;
+    const formValue = this.contactForm.value;
 
-    const request: UpdateContactMessageRequest = {
-      Id: this.selectedMessage()!.Id,
-      Name: formValue.fullName,
-      Email: formValue.email,
-      PhoneNumber: formValue.phoneNumber,
-      AdditionalPhoneNumber: formValue.additionalPhoneNumber || undefined,
-      AboutClinicUz: formValue.message,
-      AboutClinicRu: formValue.message
-    };
+    if (this.isCreateMode()) {
+      // Create new contact info
+      const createRequest: CreateContactMessageRequest = {
+        name: formValue.name,
+        email: formValue.email,
+        phoneNumber: formValue.phoneNumber,
+        additionalPhoneNumber: formValue.additionalPhoneNumber || undefined,
+        telegramChatUrl: formValue.telegramChatUrl || undefined,
+        telegramUrl: formValue.telegramUrl || undefined,
+        instagramUrl: formValue.instagramUrl || undefined,
+        facebookUrl: formValue.facebookUrl || undefined,
+        locationUrl: formValue.locationUrl || undefined,
+        aboutClinicUz: formValue.aboutClinicUz,
+        aboutClinicRu: formValue.aboutClinicRu
+      };
 
-    this.apiService.updateContactMessageRequest(request).subscribe({
-      next: () => {
-        this.notificationService.showSuccess(
-          this.translationService.currentLanguage() === 'uz' 
-            ? 'Xabar yangilandi' 
-            : 'Сообщение обновлено'
-        );
-        this.loadMessages();
-        this.cancelEdit();
-      },
-      error: (error) => {
-        this.notificationService.showError(error.message);
-      },
-      complete: () => {
-        this.submitting.set(false);
-      }
-    });
+      this.apiService.createContactMessageRequest(createRequest).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            this.translationService.currentLanguage() === 'uz' 
+              ? 'Aloqa ma\'lumotlari yaratildi' 
+              : 'Контактная информация создана'
+          );
+          this.loadContactInfo();
+          this.isCreateMode.set(false);
+        },
+        error: (error) => {
+          this.notificationService.showError(error.message);
+        },
+        complete: () => {
+          this.submitting.set(false);
+        }
+      });
+    } else {
+      // Update existing contact info
+      const updateRequest: UpdateContactMessageRequest = {
+        name: formValue.name,
+        email: formValue.email,
+        phoneNumber: formValue.phoneNumber,
+        additionalPhoneNumber: formValue.additionalPhoneNumber || undefined,
+        telegramChatUrl: formValue.telegramChatUrl || undefined,
+        telegramUrl: formValue.telegramUrl || undefined,
+        instagramUrl: formValue.instagramUrl || undefined,
+        facebookUrl: formValue.facebookUrl || undefined,
+        locationUrl: formValue.locationUrl || undefined,
+        aboutClinicUz: formValue.aboutClinicUz,
+        aboutClinicRu: formValue.aboutClinicRu
+      };
+
+      this.apiService.updateContactMessageRequest(updateRequest).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            this.translationService.currentLanguage() === 'uz' 
+              ? 'Aloqa ma\'lumotlari yangilandi' 
+              : 'Контактная информация обновлена'
+          );
+          this.loadContactInfo();
+          this.isEditMode.set(false);
+        },
+        error: (error) => {
+          this.notificationService.showError(error.message);
+        },
+        complete: () => {
+          this.submitting.set(false);
+        }
+      });
+    }
   }
 }
 

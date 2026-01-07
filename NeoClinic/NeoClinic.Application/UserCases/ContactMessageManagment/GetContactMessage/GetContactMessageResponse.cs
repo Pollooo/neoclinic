@@ -1,6 +1,7 @@
 ﻿namespace NeoClinic.Application.UserCases.ContactMessageManagment.GetContactMessage;
 
 public record GetContactMessageResponse(
+    Guid  contactId,
     string? Name,
     string? Email,
     string? PhoneNumber,

@@ -1,6 +1,7 @@
 export const routes = {
     appointments: {
         create: 'appointments/create',
+        get: 'appointments/get',
     },
     auth: {
         login: 'auth/login',

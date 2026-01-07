@@ -1,13 +1,11 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NeoClinic.Application.Common.Interfaces;
-using System.Text.Json;
 
 namespace NeoClinic.Application.UserCases.ContactMessageManagment.CreateContactMessage;
 
 public class CreateContactMessageRequestHandler(
-    IApplicationDbContext context,
-    ITelegramBotService botService)
+    IApplicationDbContext context)
     : IRequestHandler<CreateContactMessageRequest, bool>
 {
     public async Task<bool> Handle(CreateContactMessageRequest request, CancellationToken cancellationToken)
@@ -35,7 +33,6 @@ public class CreateContactMessageRequestHandler(
         if (await context.SaveChangesAsync(cancellationToken) > 0)
             return true;
 
-        await botService.NotifyAboutErrorAsync(JsonSerializer.Serialize(request), "CreateContactMessageRequestHandler");
         return false;
     }
 }

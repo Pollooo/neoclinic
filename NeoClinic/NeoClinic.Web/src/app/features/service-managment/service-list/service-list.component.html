@@ -6,17 +6,17 @@
       <div class="loading">{{ translationService.t('common.loading') }}</div>
     } @else if (services().length > 0) {
       <div class="services-grid">
-        @for (service of services(); track service.ServiceId) {
+        @for (service of services(); track service.serviceId) {
           <div class="service-card">
             <div class="service-header">
-              <h2 class="service-name">{{ translationService.currentLanguage() === 'uz' ? service.NameUz : service.NameRu }}</h2>
-              @if (service.Price) {
-                <div class="service-price">{{ service.Price }} UZS</div>
+              <h2 class="service-name">{{ translationService.currentLanguage() === 'uz' ? service.nameUz : service.nameRu }}</h2>
+              @if (service.price) {
+                <div class="service-price">{{ service.price }} UZS</div>
               }
             </div>
             
-            @if (translationService.currentLanguage() === 'uz' ? service.DescriptionUz : service.DescriptionRu) {
-              <p class="service-description">{{ translationService.currentLanguage() === 'uz' ? service.DescriptionUz : service.DescriptionRu }}</p>
+            @if (translationService.currentLanguage() === 'uz' ? service.descriptionUz : service.descriptionRu) {
+              <p class="service-description">{{ translationService.currentLanguage() === 'uz' ? service.descriptionUz : service.descriptionRu }}</p>
             }
             
             <div class="service-footer">

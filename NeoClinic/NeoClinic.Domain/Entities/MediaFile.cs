@@ -10,12 +10,12 @@ public class MediaFile
     public string? FileDescriptionUz { get; set; } = null!;
     public string? FileDescriptionRu { get; set; } = null!;
     public string ContainerName { get; set; } = string.Empty;
-    public string FileUrl { get; set; } = null!; // S3 / Railway / Cloud URL
+    public string FileUrl { get; set; } = null!;
     public string BlobName { get; set; } = string.Empty;
     public string? ContentType { get; set; }
-    public string? AltTextUz { get; set; } // for UI / SEO
-    public string? AltTextRu { get; set; } // for UI / SEO
+    public string? AltTextUz { get; set; }
+    public string? AltTextRu { get; set; }
     public bool IsDoctor { get; set; } = false;
-    public MediaType Type { get; set; } // Image or Video
+    public MediaType Type { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

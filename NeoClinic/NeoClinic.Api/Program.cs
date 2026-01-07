@@ -12,6 +12,10 @@ builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHealthChecks();
 builder.Services.AddAntiforgery();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
@@ -36,6 +40,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHealthChecks("/health");
+app.UseResponseCompression();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");

@@ -2,14 +2,12 @@
 using NeoClinic.Application.Common.Interfaces;
 using NeoClinic.Domain.Entities;
 using NeoClinic.Domain.Enums;
-using System.Text.Json;
 
 namespace NeoClinic.Application.UserCases.Doctors.CreateDoctor;
 
 public class CreateDoctorRequestHandler(
     IApplicationDbContext context,
-    IStorageService storageService,
-    ITelegramBotService botService)
+    IStorageService storageService)
     : IRequestHandler<CreateDoctorRequest, bool>
 {
     public async Task<bool> Handle(CreateDoctorRequest request, CancellationToken cancellationToken)
@@ -45,10 +43,9 @@ public class CreateDoctorRequestHandler(
 
         await context.Doctors.AddAsync(doctor, cancellationToken);
         await context.MediaFiles.AddAsync(document, cancellationToken);
-            if (await context.SaveChangesAsync(cancellationToken) > 1)
-                return true;
+        if (await context.SaveChangesAsync(cancellationToken) > 1)
+            return true;
 
-            await botService.NotifyAboutErrorAsync(JsonSerializer.Serialize(request), "CreateDoctorRequestHandler");
-            return false;
+        return false;
     }
 }

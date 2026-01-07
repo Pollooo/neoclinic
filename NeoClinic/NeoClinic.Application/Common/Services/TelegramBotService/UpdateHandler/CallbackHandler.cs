@@ -11,77 +11,55 @@ public class CallbackHandler(IApplicationDbContext context, ITelegramBotClient b
     public async Task HandleLanguageSelectionAsync(CallbackQuery query)
     {
         if (query.Data == null || query.Message == null) return;
-        var user = await context.TelegramUsers.FirstOrDefaultAsync(u => u.ChatId == query.Message.Chat.Id);
 
+        var user = await context.TelegramUsers.FirstOrDefaultAsync(u => u.ChatId == query.Message.Chat.Id);
         if (user is null) return;
 
-        string replyText = string.Empty;
-
-        switch (query.Data)
+        Language newLang = query.Data switch
         {
-            case "lang_russian":
-                if (user.Language == Language.Russian)
-                    replyText = "Язык уже установлен на Русский ✅";
-                else
-                {
-                    user.Language = Language.Russian;
-                    replyText = "Язык успешно изменён на Русский ✅";
-                }
-                break;
+            "lang_russian" => Language.Russian,
+            "lang_uzbek" => Language.Uzbek,
+            _ => Language.Uzbek
+        };
 
-            case "lang_uzbek":
-                if (user.Language == Language.Uzbek)
-                    replyText = "Til allaqachon O‘zbek tiliga o'rnatilgan✅";
-                else
-                {
-                    user.Language = Language.Uzbek;
-                    replyText = "Til muvaffaqiyatli O‘zbek tiliga o‘zgartirildi ✅";
-                }
-                break;
-
-            default:
-                user.Language = Language.Uzbek;
-                replyText = "O‘zbek tili avtomatik ravishda tanlandi, ehtimol ichki xatolik tufayli ✅";
-                break;
-        }
-
+        user.Language = newLang;
         await context.SaveChangesAsync();
+
+        string replyText = user.Language == Language.Russian
+            ? "Язык успешно установлен ✅"
+            : "Til muvaffaqiyatli o'rnatildi ✅";
 
         await bot.EditMessageText(
             chatId: user.ChatId,
-            messageId: query.Message!.MessageId,
+            messageId: query.Message.Id,
             text: replyText
         );
 
-        string waitingMessage = user.Language switch
-        {
-            Language.Russian => "Пожалуйста, дождитесь подтверждения от менеджера, чтобы быть принятым как сотрудник или отклонён ✅",
-            Language.Uzbek => "Iltimos, menejer tomonidan tasdiqlanishini kuting, xodim sifatida qabul qilinish yoki rad etilish ✅",
-            _ => "Iltimos, menejer tomonidan tasdiqlanishini kuting ✅" // fallback
-        };
+        string waitingMessage = user.Language == Language.Russian
+            ? "Пожалуйста, дождитесь подтверждения от менеджера ✅"
+            : "Iltimos, menejer tomonidan tasdiqlanishini kuting ✅";
 
         await bot.SendMessage(
             chatId: user.ChatId,
-            text: waitingMessage,
-            replyMarkup: ReplyKeyboardHelper.GetUserKeyboard()
+            text: waitingMessage
         );
 
         var manager = await context.TelegramUsers.FirstOrDefaultAsync(m => m.IsManager);
-        if (manager is null) return;
-
-        string managerMessage = user.Language switch
+        if (manager != null)
         {
-            Language.Russian => $"Пользователь [{user.FirstName}](tg://user?id={user.ChatId}) ожидает подтверждения. Выберите действие:",
-            Language.Uzbek => $"Foydalanuvchi [{user.FirstName}](tg://user?id={user.ChatId}) tasdiqlanishini kutmoqda. Harakatni tanlang:",
-            _ => $"Foydalanuvchi [{user.FirstName}](tg://user?id={user.ChatId}) tasdiqlanishini kutmoqda. Harakatni tanlang:" // fallback
-        };
+            string managerMsg = manager.Language switch
+            {
+                Language.Russian => $"Новый пользователь [{user.FirstName}](tg://user?id={user.ChatId}) ожидает подтверждения. Выберите действие:",
+                _ => $"Yangi foydalanuvchi [{user.FirstName}](tg://user?id={user.ChatId}) tasdiqlanishini kutmoqda. Harakatni tanlang:",
+            };
 
-        await bot.SendMessage(
-            chatId: manager.ChatId,
-            text: managerMessage,
-            replyMarkup: InlineKeyboardHelper.GetManagerConfirmationKeyboard(user.Id),
-            parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown
-        );
+            await bot.SendMessage(
+                chatId: manager.ChatId,
+                text: managerMsg,
+                replyMarkup: InlineKeyboardHelper.GetManagerConfirmationKeyboard(user.Id),
+                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown
+            );
+        }
     }
 
     public async Task HandleManagerActionAsync(CallbackQuery query)
@@ -94,59 +72,59 @@ public class CallbackHandler(IApplicationDbContext context, ITelegramBotClient b
         string action = parts[0];
         if (!Guid.TryParse(parts[1], out var userId)) return;
 
+        var manager = await context.TelegramUsers
+            .FirstOrDefaultAsync(u => u.ChatId == query.Message.Chat.Id && u.IsManager);
+
+        if (manager == null) return;
+
+        var managerLanguage = manager.Language;
+
         var user = await context.TelegramUsers.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return;
-
+        var userLanguage = user.Language;
         string responseText = string.Empty;
         string actionText = string.Empty;
-
-        var language = user.Language != 0 ? user.Language : Language.Uzbek;
 
         if (action == "approve")
         {
             user.IsVarified = true;
 
-            responseText = language switch
+            responseText = userLanguage switch
             {
                 Language.Russian => "Вы были успешно подтверждены менеджером ✅",
-                Language.Uzbek => "Siz menejer tomonidan muvaffaqiyatli tasdiqlandingiz ✅",
-                _ => "Siz menejer tomonidan tasdiqlandingiz ✅"
+                _ => "Siz menejer tomonidan muvaffaqiyatli tasdiqlandingiz ✅",
             };
 
-            actionText = language switch
+            actionText = managerLanguage switch
             {
                 Language.Russian => "Подтверждено ✅",
-                Language.Uzbek => "Tasdiqlandi ✅",
-                _ => "Approved ✅"
+                _ => "Tasdiqlandi ✅",
             };
 
             await bot.SendMessage(
                 chatId: user.ChatId,
-                text: language switch
+                text: userLanguage switch
                 {
                     Language.Russian => "🎉 Теперь вы администратор. Используйте кнопки ниже для управления профилями.",
-                    Language.Uzbek => "🎉 Endi siz adminsiz. Quyidagi tugmalar orqali profillarni boshqarishingiz mumkin.",
-                    _ => "🎉 You are now an admin. Use the buttons below to manage profiles."
+                    _ => "🎉 Endi siz adminsiz. Quyidagi tugmalar orqali profillarni boshqarishingiz mumkin.",
                 },
-                replyMarkup: ReplyKeyboardHelper.GetAdminKeyboard()
+                replyMarkup: ReplyKeyboardHelper.GetAdminKeyboard(user.Language)
             );
         }
         else
         {
             user.IsVarified = false;
 
-            responseText = language switch
+            responseText = userLanguage switch
             {
                 Language.Russian => "К сожалению, менеджер отклонил вашу заявку ❌",
-                Language.Uzbek => "Afsus, menejer sizning arizangizni rad etdi ❌",
-                _ => "Afsus, menejer sizning arizangizni rad etdi ❌"
+                _ => "Afsus, menejer sizning arizangizni rad etdi ❌",
             };
 
-            actionText = language switch
+            actionText = userLanguage switch
             {
                 Language.Russian => "Отклонено ❌",
-                Language.Uzbek => "Rad etildi ❌",
-                _ => "Rejected ❌"
+                _ => "Rad etildi ❌"
             };
         }
 
@@ -158,16 +136,15 @@ public class CallbackHandler(IApplicationDbContext context, ITelegramBotClient b
             text: responseText
         );
 
-        string managerMessageText = language switch
+        string managerMessageText = managerLanguage switch
         {
             Language.Russian => $"Действие выполнено: {actionText}",
-            Language.Uzbek => $"Harakat bajarildi: {actionText}",
-            _ => $"Action completed: {actionText}"
+            _ => $"Harakat bajarildi: {actionText}",
         };
 
         await bot.EditMessageText(
             chatId: query.Message.Chat.Id,
-            messageId: query.Message.MessageId,
+            messageId: query.Message.Id,
             text: managerMessageText
         );
     }

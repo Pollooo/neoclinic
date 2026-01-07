@@ -43,11 +43,24 @@
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  position: relative;
 }
 
 .media-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.media-card:hover .media-preview::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(102, 126, 234, 0.1);
+  pointer-events: none;
 }
 
 .media-preview {
@@ -62,6 +75,28 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+.media-image {
+  background: #f3f4f6;
+}
+
+.media-video {
+  background: #1a1a1a;
+  /* Ensure video element is visible */
+  min-height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.media-preview .media-video {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.media-preview .media-video[data-loaded="true"] {
+  opacity: 1;
 }
 
 .video-icon {
@@ -69,21 +104,28 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 48px;
-  height: 48px;
-  background: rgba(0, 0, 0, 0.7);
+  width: 56px;
+  height: 56px;
+  background: rgba(102, 126, 234, 0.95);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 }
 
 .video-icon svg {
-  width: 24px;
-  height: 24px;
-  margin-left: 3px;
+  width: 28px;
+  height: 28px;
+  margin-left: 4px;
+}
+
+.media-card:hover .video-icon {
+  transform: translate(-50%, -50%) scale(1.1);
+  transition: transform 0.2s;
 }
 
 .media-info {
@@ -91,25 +133,13 @@
   flex: 1;
 }
 
-.media-filename {
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 0.5rem;
-  font-size: 0.875rem;
-  word-break: break-all;
-}
-
-.media-alt {
-  color: #6b7280;
-  margin: 0 0 0.5rem;
-  font-size: 0.875rem;
-}
-
 .media-description {
-  color: #6b7280;
-  font-size: 0.875rem;
-  line-height: 1.4;
+  color: #374151;
+  font-size: 0.9375rem;
+  line-height: 1.6;
   margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
 }
 
 .btn-delete {
@@ -127,6 +157,8 @@
   gap: 0.5rem;
   font-weight: 600;
   font-size: 0.875rem;
+  position: relative;
+  z-index: 10;
 }
 
 .btn-delete:hover {
@@ -136,6 +168,214 @@
 .btn-delete svg {
   width: 16px;
   height: 16px;
+}
+
+/* Upload Area Styles */
+.upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.upload-area:hover {
+  border-color: #667eea;
+  background: #f5f7ff;
+}
+
+.upload-area.dragging {
+  border-color: #667eea;
+  background: #eef2ff;
+  transform: scale(1.02);
+}
+
+.upload-area svg {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  color: #9ca3af;
+}
+
+.upload-area:hover svg {
+  color: #667eea;
+}
+
+.upload-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem;
+}
+
+.upload-hint {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.input-file-hidden {
+  display: none;
+}
+
+.file-preview-container {
+  position: relative;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.media-preview-image,
+.media-preview-video {
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: white;
+}
+
+.btn-remove-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin: 0 auto;
+}
+
+.btn-remove-file:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.btn-remove-file svg {
+  width: 20px;
+  height: 20px;
+}
+
+.file-info-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.file-name-text {
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+
+.file-size-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Lightbox Styles */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 10000;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-close svg {
+  width: 24px;
+  height: 24px;
+}
+
+.lightbox-content {
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lightbox-media {
+  flex-shrink: 0;
+}
+
+.lightbox-media img,
+.lightbox-media video {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;
+  width: auto;
+  height: auto;
+}
+
+.lightbox-media video {
+  background: #000;
+}
+
+.lightbox-description {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.lightbox-description p {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
 }
 
 @media (max-width: 768px) {
@@ -149,6 +389,11 @@
 
   .tab {
     text-align: center;
+  }
+
+  .lightbox-close {
+    top: 1rem;
+    right: 1rem;
   }
 }
 

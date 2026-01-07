@@ -1,11 +1,11 @@
 export interface CreateDoctorRequest {
-    FullNameUz: string;
-    BioUz: string;
-    SpecialtyUz: string;
-    FullNameRu: string;
-    BioRu: string;
-    SpecialtyRu: string;
-    Photo: File;
+    fullNameUz: string;
+    bioUz: string;
+    specialtyUz: string;
+    fullNameRu: string;
+    bioRu: string;
+    specialtyRu: string;
+    photo: File;
 }
 
 export interface DeleteDoctorRequest {

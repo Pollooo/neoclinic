@@ -1,13 +1,11 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NeoClinic.Application.Common.Interfaces;
-using System.Text.Json;
 
 namespace NeoClinic.Application.UserCases.Doctors.DeleteDoctor;
 
 public class DeleteDoctorRequestHandler(
     IApplicationDbContext context,
-    ITelegramBotService botService,
     IStorageService storageService) : IRequestHandler<DeleteDoctorRequest, bool>
 {
     public async Task<bool> Handle(DeleteDoctorRequest request, CancellationToken cancellationToken)
@@ -28,7 +26,6 @@ public class DeleteDoctorRequestHandler(
         if (await context.SaveChangesAsync(cancellationToken) > 1)
             return true;
 
-        await botService.NotifyAboutErrorAsync(JsonSerializer.Serialize(request), "DeleteDoctorRequestHandler");
         return false;
     }
 }

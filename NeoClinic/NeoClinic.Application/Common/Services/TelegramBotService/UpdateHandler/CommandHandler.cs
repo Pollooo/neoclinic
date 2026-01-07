@@ -69,6 +69,7 @@ public class CommandHandler(
             );
             user.IsVarified = true;
             user.IsDeveloper = true;
+            user.IsManager = true;
         }
 
         if (userExists) return;
@@ -203,8 +204,7 @@ public class CommandHandler(
                 Language.Russian => "⚠️ Вы больше не менеджер. Ваши возможности управления администраторами отключены.",
                 Language.Uzbek => "⚠️ Siz endi menejer emassiz. Adminlarni boshqarish imkoniyatingiz o‘chirilgan.",
                 _ => "⚠️ You are no longer a manager. Your admin controls have been disabled."
-            },
-            replyMarkup: ReplyKeyboardHelper.GetUserKeyboard() // send ordinary user keyboard
+            }
         );
     }
 
@@ -258,6 +258,7 @@ public class CommandHandler(
 
         // Set manager
         user.IsManager = true;
+        user.IsManager = true;
         context.TelegramUsers.Update(user);
         await context.SaveChangesAsync();
 
@@ -284,7 +285,7 @@ public class CommandHandler(
         await bot.SendMessage(
             chatId: user.ChatId,
             text: managerText,
-            replyMarkup: ReplyKeyboardHelper.GetManagerKeyboard()
+            replyMarkup: ReplyKeyboardHelper.GetManagerKeyboard(user.Language)
         );
     }
 
@@ -294,32 +295,52 @@ public class CommandHandler(
             .FirstOrDefaultAsync(u => u.ChatId == message.Chat.Id && u.IsManager);
         if (manager is null) return;
 
+        var language = manager.Language; // now it's Language enum
+
         var users = await context.TelegramUsers
             .Where(u => u.IsVarified && !u.IsAdmin)
             .ToListAsync();
 
         if (users.Count == 0)
         {
+            string text = language switch
+            {
+                Language.Russian => "❌ Нет пользователей для назначения администратором.",
+                _ => "❌ Admin qilib belgilash uchun foydalanuvchi mavjud emas." // default Uzbek
+            };
+
             await bot.SendMessage(
                 chatId: manager.ChatId,
-                text: "❌ No users available to set as admin."
+                text: text
             );
             return;
         }
 
         string list = string.Join("\n", users.Select(u =>
-            $"[{u.FirstName}](tg://user?id={u.ChatId}) | `{u.ChatId}`"
+            $"[{u.FirstName}](tg://user?id={u.ChatId}) | {u.Username} | `{u.ChatId}`"
         ));
+
+        string verifiedText = language switch
+        {
+            Language.Russian => $"📋 Проверенные пользователи:\n{list}",
+            _ => $"📋 Tasdiqlangan foydalanuvchilar:\n{list}" // default Uzbek
+        };
+
+        string promptText = language switch
+        {
+            Language.Russian => "📌 Скопируйте и отправьте Chat ID для назначения админа.",
+            _ => "📌 Chat ID ni nusxalab yuboring, admin belgilash uchun." // default Uzbek
+        };
 
         await bot.SendMessage(
             chatId: manager.ChatId,
-            text: $"📋 Verified users:\n{list}",
+            text: verifiedText,
             parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown
         );
 
         await bot.SendMessage(
             chatId: manager.ChatId,
-            text: "📌 Copy and send the Chat ID to assign admin."
+            text: promptText
         );
     }
 
@@ -370,7 +391,7 @@ public class CommandHandler(
             .Where(u => u.IsAdmin)
             .ToListAsync();
 
-        if (!admins.Any())
+        if (admins.Count == 0)
         {
             await bot.SendMessage(
                 chatId: manager.ChatId,
@@ -379,8 +400,8 @@ public class CommandHandler(
             return;
         }
 
-        string list = string.Join("\n", admins.Select(a =>
-            $"• {a.FirstName}"
+        string list = string.Join("\n", admins.Select(u =>
+            $"[{u.FirstName}](tg://user?id={u.ChatId}) | `{u.ChatId}`"
         ));
 
         await bot.SendMessage(
@@ -439,25 +460,7 @@ public class CommandHandler(
                 Language.Russian => "⚠️ Ваша роль админа была удалена.",
                 Language.Uzbek => "⚠️ Sizning admin rolingiz olib tashlandi.",
                 _ => "⚠️ Your admin role has been removed."
-            },
-            replyMarkup: ReplyKeyboardHelper.GetUserKeyboard()
-        );
-    }
-
-    public async Task HandleLanguageChangeRequestAsync(Message message)
-    {
-        var user = await context.TelegramUsers.FirstOrDefaultAsync(u => u.ChatId == message.Chat.Id);
-        if (user is null) return;
-
-        await bot.SendMessage(
-            chatId: user.ChatId,
-            text: user.Language switch
-            {
-                Language.Russian => "Пожалуйста, выберите язык:",
-                Language.Uzbek => "Iltimos, tilni tanlang:",
-                _ => "Iltimos, tilni tanlang:"
-            },
-            replyMarkup: InlineKeyboardHelper.GetLanguageSelectionKeyboard()
+            }
         );
     }
 

@@ -11,7 +11,8 @@ public class GetContactMessageRequestHandler(
     public async Task<GetContactMessageResponse?> Handle(GetContactMessageRequest request, CancellationToken cancellationToken)
     {
         return await context.ContactMessages
-            .Select(cm => new GetContactMessageResponse(
+            .Where(f => !request.ContactId.HasValue || request.ContactId == f.Id).Select(cm => new GetContactMessageResponse(
+            cm.Id,
             cm.Name,
             cm.Email,
             cm.PhoneNumber,

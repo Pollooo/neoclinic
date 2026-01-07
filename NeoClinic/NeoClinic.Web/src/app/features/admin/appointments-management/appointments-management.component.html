@@ -1,12 +1,133 @@
 <div class="appointments-management">
-  <h1 class="page-title">{{ translationService.t('admin.appointments') }}</h1>
-  
-  <div class="empty-state">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-    </svg>
-    <p>{{ translationService.currentLanguage() === 'uz' ? 'Qabullar ro\'yxati bo\'sh' : 'Список записей пуст' }}</p>
-    <small>{{ translationService.currentLanguage() === 'uz' ? 'Backend API qo\'llab-quvvatlanmagan' : 'Backend API не поддерживается' }}</small>
+  <div class="header">
+    <h1 class="page-title">{{ translationService.t('admin.appointments') }}</h1>
+    <button class="btn btn-filter" (click)="toggleFilters()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+      </svg>
+      {{ translationService.currentLanguage() === 'uz' ? 'Filtr' : 'Фильтр' }}
+    </button>
   </div>
+
+  <!-- Filters -->
+  @if (showFilters()) {
+    <div class="filters-card">
+    <h3 class="filters-title">
+      {{ translationService.currentLanguage() === 'uz' ? 'Filtrlar' : 'Фильтры' }}
+    </h3>
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label>{{ translationService.currentLanguage() === 'uz' ? 'Boshlanish sanasi' : 'Дата начала' }}</label>
+        <input 
+          type="date" 
+          [(ngModel)]="filterStartDate" 
+          class="input"
+        />
+      </div>
+      <div class="filter-group">
+        <label>{{ translationService.currentLanguage() === 'uz' ? 'Tugash sanasi' : 'Дата окончания' }}</label>
+        <input 
+          type="date" 
+          [(ngModel)]="filterEndDate" 
+          class="input"
+        />
+      </div>
+    </div>
+    <div class="filters-actions">
+      <button class="btn btn-secondary" (click)="clearFilter()">
+        {{ translationService.currentLanguage() === 'uz' ? 'Tozalash' : 'Очистить' }}
+      </button>
+      <button class="btn btn-primary" (click)="applyFilter()">
+        {{ translationService.currentLanguage() === 'uz' ? 'Qo\'llash' : 'Применить' }}
+      </button>
+    </div>
+  </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>{{ translationService.t('common.loading') }}</p>
+    </div>
+  } @else if (appointments().length === 0) {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+      </svg>
+      <p>{{ translationService.currentLanguage() === 'uz' ? 'Qabullar topilmadi' : 'Записи не найдены' }}</p>
+      <small>{{ translationService.currentLanguage() === 'uz' ? 'Tanlangan filtrlar bo\'yicha qabullar mavjud emas' : 'Нет записей по выбранным фильтрам' }}</small>
+    </div>
+  } @else {
+    <div class="appointments-list">
+      @for (appointment of appointments(); track appointment.appointmentId) {
+        <div class="appointment-card">
+          <div class="appointment-header">
+            <div class="patient-info">
+              <h3>{{ appointment.patientName }}</h3>
+              <div class="date-info">
+                <span class="date-label">{{ translationService.currentLanguage() === 'uz' ? 'Qabul sanasi' : 'Дата приема' }}:</span>
+                <span class="date">{{ formatDate(appointment.appointmentDate) }}</span>
+              </div>
+            </div>
+            <div [class]="isAppointmentOld(appointment.appointmentDate) ? 'status-badge status-old' : 'status-badge status-new'">
+              {{ isAppointmentOld(appointment.appointmentDate) 
+                ? (translationService.currentLanguage() === 'uz' ? 'Eski' : 'Старая')
+                : (translationService.currentLanguage() === 'uz' ? 'Yangi' : 'Новая') }}
+            </div>
+          </div>
+          
+          <div class="appointment-body">
+            <div class="contact-details">
+              <div class="info-row">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                </svg>
+                <a [href]="'tel:' + appointment.phoneNumber">{{ appointment.phoneNumber }}</a>
+              </div>
+              
+              @if (appointment.email) {
+                <div class="info-row">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                  </svg>
+                  <a [href]="'mailto:' + appointment.email">{{ appointment.email }}</a>
+                </div>
+              }
+              
+              @if (appointment.getServicesResponse) {
+                <div class="info-row">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                  </svg>
+                  <span>
+                    {{ getServiceName(appointment.getServicesResponse) }}
+                    @if (appointment.getServicesResponse.price) {
+                      <span class="service-price">
+                        ( {{ appointment.getServicesResponse.price | number:'1.0-0' }} {{ translationService.currentLanguage() === 'uz' ? 'so\'m' : 'сум' }} )
+                      </span>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+            
+            @if (appointment.message) {
+              <div class="message-box">
+                <strong>{{ translationService.currentLanguage() === 'uz' ? 'Xabar' : 'Сообщение' }}:</strong>
+                <p>{{ appointment.message }}</p>
+              </div>
+            }
+          </div>
+          
+          <div class="appointment-footer">
+            <small>
+              <span class="footer-label">{{ translationService.currentLanguage() === 'uz' ? 'Yaratilgan sana' : 'Дата создания' }}:</span>
+              {{ formatDate(appointment.createdAt) }}
+            </small>
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>
 

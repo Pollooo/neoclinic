@@ -26,6 +26,7 @@
             formControlName="phoneNumber" 
             class="input"
             placeholder="+998 XX XXX-XX-XX"
+            (focus)="onPhoneNumberFocus($event)"
             [class.error]="appointmentForm.get('phoneNumber')?.invalid && appointmentForm.get('phoneNumber')?.touched"
           />
           @if (appointmentForm.get('phoneNumber')?.invalid && appointmentForm.get('phoneNumber')?.touched) {
@@ -36,13 +37,55 @@
         </div>
 
         <div class="form-group">
-          <label class="label">{{ translationService.t('appointment.selectDoctor') }}</label>
-          <select formControlName="doctorId" class="input">
-            <option value="">{{ translationService.currentLanguage() === 'uz' ? 'Shifokorni tanlang' : 'Выберите врача' }}</option>
-            @for (doctor of doctors(); track doctor.DoctorId) {
-              <option [value]="doctor.DoctorId">{{ getDoctorName(doctor) }} - {{ getDoctorSpecialty(doctor) }}</option>
-            }
-          </select>
+          <label class="label">{{ translationService.t('appointment.email') }}</label>
+          <input 
+            type="email" 
+            formControlName="email" 
+            class="input"
+            placeholder="example@mail.com"
+            [class.error]="appointmentForm.get('email')?.invalid && appointmentForm.get('email')?.touched"
+          />
+          @if (appointmentForm.get('email')?.invalid && appointmentForm.get('email')?.touched) {
+            <span class="error-message">
+              {{ translationService.currentLanguage() === 'uz' ? 'Haqiqiy email kiriting' : 'Введите действительный email' }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="label">{{ translationService.t('appointment.selectService') }} *</label>
+          @if (loadingServices()) {
+            <select class="input" disabled>
+              <option>{{ translationService.t('common.loading') }}</option>
+            </select>
+          } @else {
+            <select 
+              formControlName="serviceId" 
+              class="input"
+              [class.error]="appointmentForm.get('serviceId')?.invalid && appointmentForm.get('serviceId')?.touched"
+            >
+              <option value="">{{ translationService.currentLanguage() === 'uz' ? 'Xizmatni tanlang' : 'Выберите услугу' }}</option>
+              @for (service of services(); track service.serviceId) {
+                <option [value]="service.serviceId">{{ getServiceName(service) }}</option>
+              }
+            </select>
+          }
+          @if (appointmentForm.get('serviceId')?.invalid && appointmentForm.get('serviceId')?.touched) {
+            <span class="error-message">
+              {{ translationService.currentLanguage() === 'uz' ? 'Xizmatni tanlang' : 'Выберите услугу' }}
+            </span>
+          }
+          @if (!loadingServices() && services().length === 0) {
+            <span class="error-message">
+              {{ translationService.currentLanguage() === 'uz' ? 'Xizmatlar topilmadi' : 'Услуги не найдены' }}
+            </span>
+          }
+          <!-- Debug: Display services count -->
+          @if (!loadingServices() && services().length > 0) {
+            <small style="color: #6b7280; margin-top: 0.25rem; display: block;">
+              {{ services().length }} {{ translationService.currentLanguage() === 'uz' ? 'xizmat mavjud' : 'доступных услуг' }}
+            </small>
+          }
         </div>
 
         <div class="form-group">
@@ -51,6 +94,7 @@
             type="datetime-local" 
             formControlName="appointmentDate" 
             class="input"
+            [min]="minDate + 'T00:00'"
             [class.error]="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched"
           />
           @if (appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched) {

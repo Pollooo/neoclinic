@@ -30,7 +30,16 @@ export class GalleryComponent implements OnInit {
   private loadMedia(): void {
     this.apiService.getMediaFilesRequest({}).subscribe({
       next: (media) => {
-        this.media.set(media);
+        // Filter out background and clinic name images
+        const filteredMedia = media.filter(m => {
+          const descUz = m.fileDescriptionUz?.toLowerCase() || '';
+          const descRu = m.fileDescriptionRu?.toLowerCase() || '';
+          return !descUz.includes('background') && 
+                 !descRu.includes('background') && 
+                 !descUz.includes('clinic name') && 
+                 !descRu.includes('clinic name');
+        });
+        this.media.set(filteredMedia);
         this.loading.set(false);
       },
       error: (error) => {
@@ -48,11 +57,12 @@ export class GalleryComponent implements OnInit {
     if (this.activeFilter() === 'all') {
       return this.media();
     }
-    return this.media().filter(m => m.Type === this.activeFilter()?.toString());
+    return this.media().filter(m => m.type === this.activeFilter());
   }
 
   public getMediaUrl(fileUrl: string): string {
-    return `${environment.apiBaseUrl}/${fileUrl}`;
+    // fileUrl is already a complete Azure Blob Storage URL
+    return fileUrl;
   }
 
   public openLightbox(media: GetMediaFilesResponse): void {
@@ -61,5 +71,28 @@ export class GalleryComponent implements OnInit {
 
   public closeLightbox(): void {
     this.selectedMedia.set(null);
+  }
+
+  public onVideoError(event: Event, media?: GetMediaFilesResponse): void {
+    const videoElement = event.target as HTMLVideoElement;
+    console.error('Video loading error:', {
+      error: videoElement.error,
+      src: videoElement.currentSrc,
+      readyState: videoElement.readyState,
+      networkState: videoElement.networkState,
+      media: media
+    });
+  }
+
+  public onVideoLoaded(event: Event): void {
+    const videoElement = event.target as HTMLVideoElement;
+    videoElement.setAttribute('data-loaded', 'true');
+    console.log('Video loaded successfully:', event);
+  }
+
+  public getFileDescription(media: GetMediaFilesResponse): string {
+    return this.translationService.currentLanguage() === 'uz' 
+      ? (media.fileDescriptionUz || '') 
+      : (media.fileDescriptionRu || '');
   }
 }

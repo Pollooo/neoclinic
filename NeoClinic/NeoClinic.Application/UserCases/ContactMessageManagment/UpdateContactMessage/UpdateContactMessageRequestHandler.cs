@@ -7,8 +7,7 @@ using System.Text.Json;
 namespace NeoClinic.Application.UserCases.ContactMessageManagment.UpdateContactMessage;
 
 public class UpdateContactMessageRequestHandler(
-    IApplicationDbContext context,
-    ITelegramBotService botService)
+    IApplicationDbContext context)
     : IRequestHandler<UpdateContactMessageRequest, bool>
 {
     public async Task<bool> Handle(UpdateContactMessageRequest request, CancellationToken cancellationToken)
@@ -34,7 +33,6 @@ public class UpdateContactMessageRequestHandler(
         if (await context.SaveChangesAsync(cancellationToken) > 0)
             return true;
 
-        await botService.NotifyAboutErrorAsync(JsonSerializer.Serialize(request), "UpdateContactMessageRequestHandler");
         return false;
     }
 }

@@ -16,8 +16,7 @@ export class DashboardComponent implements OnInit {
   private apiService = inject(ApiService);
 
   public stats = signal({
-    appointments: 0,
-    messages: 0,
+    futureAppointments: 0,
     doctors: 0,
     services: 0,
     mediaFiles: 0
@@ -30,15 +29,25 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadStats(): void {
+    const today = new Date();
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(today.getMonth() + 3);
+
     Promise.all([
-      this.apiService.getContactMessageRequest({}).toPromise(),
+      this.apiService.getAppointmentsRequest({}).toPromise(),
       this.apiService.getDoctorsRequest({}).toPromise(),
       this.apiService.getServicesRequest({}).toPromise(),
       this.apiService.getMediaFilesRequest({}).toPromise()
-    ]).then(([messages, doctors, services, media]) => {
+    ]).then(([appointments, doctors, services, media]) => {
+      // Filter future appointments (next 3 months)
+      const futureAppointments = appointments?.filter(apt => {
+        if (!apt.appointmentDate) return false;
+        const aptDate = new Date(apt.appointmentDate);
+        return aptDate >= today && aptDate <= threeMonthsFromNow;
+      }) || [];
+
       this.stats.set({
-        appointments: 0, // No GET endpoint for appointments
-        messages: messages?.length || 0,
+        futureAppointments: futureAppointments.length,
         doctors: doctors?.length || 0,
         services: services?.length || 0,
         mediaFiles: media?.length || 0

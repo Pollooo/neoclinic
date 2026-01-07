@@ -6,10 +6,10 @@
       <div class="loading">{{ translationService.t('common.loading') }}</div>
     } @else if (doctors().length > 0) {
       <div class="doctors-grid">
-        @for (doctor of doctors(); track doctor.DoctorId) {
+        @for (doctor of doctors(); track doctor.doctorId) {
           <div class="doctor-card">
-            @if (doctor.PhotoUrl) {
-              <img [src]="doctor.PhotoUrl" [alt]="getDoctorName(doctor)" class="doctor-photo" />
+            @if (doctor.photoUrl) {
+              <img [src]="doctor.photoUrl" [alt]="getDoctorName(doctor)" class="doctor-photo" />
             } @else {
               <div class="doctor-avatar">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -40,5 +40,6 @@
     }
   </div>
 </div>
+
 
 

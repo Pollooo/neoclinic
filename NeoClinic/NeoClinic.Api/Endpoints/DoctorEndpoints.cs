@@ -12,12 +12,11 @@ public static class DoctorEndpoints
     public static void MapDoctorEndpoints(this WebApplication app)
     {
         app.MapPost($"{GroupName}/create", CreateDoctorAsync)
-             .Accepts<IFormFile>("multipart/form-data")
              .DisableAntiforgery()
              .RequireAuthorization("AdminPolicy");
         app.MapDelete($"{GroupName}/delete/{{doctorId:guid}}", DeleteDoctorAsync)
             .RequireAuthorization("AdminPolicy");
-        app.MapGet($"{GroupName}/get/{{doctorId:guid}}", GetDoctorsAsync);
+        app.MapGet($"{GroupName}/get", GetDoctorsAsync);
     }
 
     private static async Task<IResult> CreateDoctorAsync(

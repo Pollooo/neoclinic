@@ -3,10 +3,7 @@ using NeoClinic.Application.Common.Interfaces;
 
 namespace NeoClinic.Application.UserCases.Doctors.UpdateDoctor;
 
-public class UpdateDoctorRequestHandler(
-    IApplicationDbContext context,
-    IStorageService storageService,
-    ITelegramBotService botService)
+public class UpdateDoctorRequestHandler()
     : IRequestHandler<UpdateDoctorRequest, bool>
 {
     public Task<bool> Handle(UpdateDoctorRequest request, CancellationToken cancellationToken)

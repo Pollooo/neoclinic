@@ -5,6 +5,8 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { ApiService } from '../../../core/services/api.service';
 import { GetServicesResponse } from '../../../core/models/response-models/service-response.model';
 import { GetDoctorsResponse } from '../../../core/models/response-models/doctor-response.model';
+import { GetContactMessageResponse } from '../../../core/models/response-models/contact-message-response.model';
+import { GetMediaFilesResponse } from '../../../core/models/response-models/media-file-response.model';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
@@ -23,10 +25,45 @@ export class HomeComponent implements OnInit {
   public servicesLoading = signal(true);
   public doctors = signal<GetDoctorsResponse[]>([]);
   public doctorsLoading = signal(true);
+  public contactInfo = signal<GetContactMessageResponse | null>(null);
+  public backgroundImage = signal<string | null>(null);
+  public galleryMedia = signal<GetMediaFilesResponse[]>([]);
+  public galleryLoading = signal(true);
 
   ngOnInit(): void {
     this.loadServices();
     this.loadDoctors();
+    this.loadContactInfo();
+    this.loadBackgroundImage();
+    this.loadGallery();
+  }
+
+  private loadContactInfo(): void {
+    this.apiService.getContactMessageRequest({}).subscribe({
+      next: (info) => {
+        this.contactInfo.set(info);
+      },
+      error: (error) => {
+        console.error('Failed to load contact info:', error);
+      }
+    });
+  }
+
+  private loadBackgroundImage(): void {
+    this.apiService.getMediaFilesRequest({}).subscribe({
+      next: (media) => {
+        const backgroundMedia = media.find(m => 
+          m.fileDescriptionUz?.toLowerCase().includes('background') || 
+          m.fileDescriptionRu?.toLowerCase().includes('background')
+        );
+        if (backgroundMedia) {
+          this.backgroundImage.set(backgroundMedia.fileUrl);
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load background image:', error);
+      }
+    });
   }
 
   private loadServices(): void {
@@ -57,31 +94,54 @@ export class HomeComponent implements OnInit {
 
   public getDoctorName(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? doctor.FullNameUz 
-      : doctor.FullNameRu;
+      ? doctor.fullNameUz 
+      : doctor.fullNameRu;
   }
 
   public getDoctorSpecialty(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (doctor.SpecialtyUz || '') 
-      : (doctor.SpecialtyRu || '');
+      ? (doctor.specialtyUz || '') 
+      : (doctor.specialtyRu || '');
   }
 
   public getDoctorBio(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (doctor.BioUz || '') 
-      : (doctor.BioRu || '');
+      ? (doctor.bioUz || '') 
+      : (doctor.bioRu || '');
   }
 
   public getServiceName(service: GetServicesResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? service.NameUz 
-      : service.NameRu;
+      ? service.nameUz 
+      : service.nameRu;
   }
 
   public getServiceDescription(service: GetServicesResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (service.DescriptionUz || '') 
-      : (service.DescriptionRu || '');
+      ? (service.descriptionUz || '') 
+      : (service.descriptionRu || '');
+  }
+
+  private loadGallery(): void {
+    this.apiService.getMediaFilesRequest({}).subscribe({
+      next: (media) => {
+        // Filter: only images (type 0), exclude background and clinic name images, take only first 6
+        const filteredMedia = media.filter(m => {
+          const descUz = m.fileDescriptionUz?.toLowerCase() || '';
+          const descRu = m.fileDescriptionRu?.toLowerCase() || '';
+          return m.type === 0 && // Only images
+                 !descUz.includes('background') && 
+                 !descRu.includes('background') && 
+                 !descUz.includes('clinic name') && 
+                 !descRu.includes('clinic name');
+        }).slice(0, 6);
+        this.galleryMedia.set(filteredMedia);
+        this.galleryLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to load gallery:', error);
+        this.galleryLoading.set(false);
+      }
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { ApiService } from '../../../core/services/api.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -10,7 +10,7 @@ import { LocalStorageService } from '../../../core/services/local-storage.servic
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -38,19 +38,19 @@ export class LoginComponent {
 
     const formValue = this.loginForm.value;
     const request = {
-      Username: formValue.username,
-      Password: formValue.password
+      username: formValue.username,
+      password: formValue.password
     };
 
     this.apiService.loginRequest(request).subscribe({
       next: (response) => {
-        this.localStorageService.setAccessToken(response.AccessToken);
+        this.localStorageService.setAccessToken(response.accessToken);
         this.notificationService.showSuccess(
           this.translationService.currentLanguage() === 'uz' 
             ? 'Tizimga muvaffaqiyatli kirdingiz' 
             : 'Вы успешно вошли в систему'
         );
-        this.router.navigate(['/admin/dashboard']);
+        this.router.navigate(['/' + this.translationService.currentLanguage() + '/admin/dashboard']);
       },
       error: (error) => {
         this.notificationService.showError(error.message || this.translationService.t('admin.invalidCredentials'));

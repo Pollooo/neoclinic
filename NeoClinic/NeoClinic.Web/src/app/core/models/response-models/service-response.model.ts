@@ -1,8 +1,8 @@
 export interface GetServicesResponse {
-    ServiceId: string;
-    NameUz: string;
-    DescriptionUz?: string;
-    NameRu: string;
-    DescriptionRu?: string;
-    Price?: number;
+    serviceId: string;
+    nameUz: string;
+    descriptionUz?: string;
+    nameRu: string;
+    descriptionRu?: string;
+    price?: number;
 }

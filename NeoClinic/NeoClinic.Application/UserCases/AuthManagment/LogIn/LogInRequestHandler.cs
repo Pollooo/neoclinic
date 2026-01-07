@@ -6,8 +6,7 @@ namespace NeoClinic.Application.UserCases.AuthManagment.LogIn;
 
 public class LogInRequestHandler(
     IApplicationDbContext context,
-    ITokenService tokenService,
-    ITelegramBotService botService)
+    ITokenService tokenService)
     : IRequestHandler<LogInRequest, LogInResponse?>
 {
     public async Task<LogInResponse?> Handle(LogInRequest request, CancellationToken cancellationToken)
@@ -17,7 +16,6 @@ public class LogInRequestHandler(
             return null;
 
         var logInResponse = tokenService.GenerateAccessToken(admin.Id, admin.Username, true);
-        await botService.NotifyEveryoneAboutLogin(admin.Username);
         return logInResponse;
     }
 }

@@ -1,9 +1,9 @@
 export interface CreateServiceRequest {
-    NameUz: string;
-    DescriptionUz?: string;
-    NameRu: string;
-    DescriptionRu?: string;
-    Price?: number;
+    nameUz: string;
+    descriptionUz?: string;
+    nameRu: string;
+    descriptionRu?: string;
+    price?: number;
 }
 
 export interface DeleteServiceRequest {
@@ -11,5 +11,5 @@ export interface DeleteServiceRequest {
 }
 
 export interface GetServicesRequest {
-    ServiceId?: string;
+    serviceId?: string;
 }

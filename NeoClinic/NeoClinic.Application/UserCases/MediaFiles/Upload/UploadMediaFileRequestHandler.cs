@@ -1,14 +1,12 @@
 ﻿using MediatR;
 using NeoClinic.Application.Common.Interfaces;
 using NeoClinic.Domain.Entities;
-using System.Text.Json;
 
 namespace NeoClinic.Application.UserCases.MediaFiles.Upload;
 
 public class UploadMediaFileRequestHandler(
     IApplicationDbContext context,
-    IStorageService storageService,
-    ITelegramBotService botService)
+    IStorageService storageService)
     : IRequestHandler<UploadMediaFileRequest, bool>
 {
     public async Task<bool> Handle(UploadMediaFileRequest request, CancellationToken cancellationToken)
@@ -27,7 +25,7 @@ public class UploadMediaFileRequestHandler(
             FileUrl = fileUrl,
             ContainerName = "neo-clinic-docs",
             ContentType = request.File.ContentType,
-            IsDoctor = true,
+            IsDoctor = false,
             Type = request.Type,
             AltTextUz = request.AltTextUz,
             AltTextRu = request.AltTextRu,
@@ -38,7 +36,6 @@ public class UploadMediaFileRequestHandler(
         if (await context.SaveChangesAsync(cancellationToken) > 0)
             return true;
 
-        await botService.NotifyAboutErrorAsync(JsonSerializer.Serialize(request), "UploadMediaFileRequestHandler");
         return false;
     }
 }

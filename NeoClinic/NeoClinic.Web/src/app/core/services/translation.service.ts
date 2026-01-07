@@ -1,4 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { LocalStorageService } from './local-storage.service';
 
 export type Language = 'uz' | 'ru';
@@ -12,7 +14,39 @@ export interface Translations {
 })
 export class TranslationService {
   private readonly localStorageService = inject(LocalStorageService);
+  private readonly router = inject(Router);
   public currentLanguage = signal<Language>('uz');
+
+  constructor() {
+    // Initialize language from localStorage first
+    const savedLanguage = this.localStorageService.getLanguage();
+    if (savedLanguage) {
+      this.currentLanguage.set(savedLanguage as Language);
+    }
+    
+    // Then initialize from route or localStorage
+    this.initializeLanguageFromRoute();
+    
+    // Listen to route changes
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.initializeLanguageFromRoute();
+    });
+  }
+
+  private initializeLanguageFromRoute(): void {
+    const url = this.router.url;
+    const langMatch = url.match(/^\/(uz|ru)/);
+    
+    if (langMatch) {
+      const routeLang = langMatch[1] as Language;
+      if (this.currentLanguage() !== routeLang) {
+        this.currentLanguage.set(routeLang);
+        this.localStorageService.setLanguage(routeLang);
+      }
+    }
+  }
 
   private translations: Record<Language, Translations> = {
     uz: {
@@ -46,16 +80,18 @@ export class TranslationService {
         title: 'Qabulga yozilish',
         fullName: 'Ism-familiya',
         phoneNumber: 'Telefon raqami',
+        email: 'Email',
         description: 'Qo\'shimcha ma\'lumot',
         selectDate: 'Sanani tanlang',
         selectDoctor: 'Shifokorni tanlang',
+        selectService: 'Xizmatni tanlang',
         success: 'Qabulga muvaffaqiyatli yozildingiz!',
         error: 'Xatolik yuz berdi. Qayta urinib ko\'ring.',
       },
       // Contact
       contact: {
         title: 'Biz bilan bog\'laning',
-        name: 'Ismingiz',
+        name: 'Kompaniya nomi',
         email: 'Email',
         phone: 'Telefon',
         message: 'Xabar',
@@ -132,16 +168,18 @@ export class TranslationService {
         title: 'Запись на прием',
         fullName: 'ФИО',
         phoneNumber: 'Номер телефона',
+        email: 'Email',
         description: 'Дополнительная информация',
         selectDate: 'Выберите дату',
         selectDoctor: 'Выберите врача',
+        selectService: 'Выберите услугу',
         success: 'Вы успешно записались на прием!',
         error: 'Произошла ошибка. Попробуйте еще раз.',
       },
       // Contact
       contact: {
         title: 'Свяжитесь с нами',
-        name: 'Ваше имя',
+        name: 'Название компании',
         email: 'Email',
         phone: 'Телефон',
         message: 'Сообщение',
@@ -189,14 +227,15 @@ export class TranslationService {
     }
   };
 
-  constructor() {
-    const savedLanguage = this.localStorageService.getLanguage();
-    this.currentLanguage.set(savedLanguage as Language);
-  }
-
   public setLanguage(language: Language): void {
     this.currentLanguage.set(language);
     this.localStorageService.setLanguage(language);
+    
+    // Navigate to the new language route
+    const currentUrl = this.router.url;
+    const urlWithoutLang = currentUrl.replace(/^\/(uz|ru)/, '');
+    const newUrl = `/${language}${urlWithoutLang || ''}`;
+    this.router.navigateByUrl(newUrl);
   }
 
   public translate(key: string): string {

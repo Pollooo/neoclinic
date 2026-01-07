@@ -13,7 +13,6 @@ public interface ICommandHandler
     Task HandleSetAdminAsync(Message message);
     Task HandleRemoveAdminAsync(Message message);
     Task HandleDeleteAdminAsync(Message message);
-    Task HandleLanguageChangeRequestAsync(Message message);
     Task HandleCreateProfileAsync(Message message);
     Task HandleGetProfileAsync(Message message);
 }

@@ -37,19 +37,19 @@ export class DoctorListComponent implements OnInit {
 
   public getDoctorName(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? doctor.FullNameUz 
-      : doctor.FullNameRu;
+      ? doctor.fullNameUz 
+      : doctor.fullNameRu;
   }
 
   public getDoctorSpecialty(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (doctor.SpecialtyUz || '') 
-      : (doctor.SpecialtyRu || '');
+      ? (doctor.specialtyUz || '') 
+      : (doctor.specialtyRu || '');
   }
 
   public getDoctorBio(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (doctor.BioUz || '') 
-      : (doctor.BioRu || '');
+      ? (doctor.bioUz || '') 
+      : (doctor.bioRu || '');
   }
 }

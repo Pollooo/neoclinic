@@ -38,13 +38,23 @@
     <div class="loading">{{ translationService.t('common.loading') }}</div>
   } @else if (filteredMedia().length > 0) {
     <div class="media-grid">
-      @for (mediaItem of filteredMedia(); track mediaItem.FileId) {
-        <div class="media-card">
+      @for (mediaItem of filteredMedia(); track mediaItem.id) {
+        <div class="media-card" (click)="openMediaLightbox(mediaItem)">
           <div class="media-preview">
-            @if (mediaItem.Type === MediaType.Image.toString()) {
-              <img [src]="getMediaUrl(mediaItem.FileUrl)" [alt]="getAltText(mediaItem)" class="media-image" />
-            } @else if (mediaItem.Type === MediaType.Video.toString()) {
-              <video [src]="getMediaUrl(mediaItem.FileUrl)" class="media-video"></video>
+            @if (mediaItem.type === MediaType.Image) {
+              <img [src]="getMediaUrl(mediaItem.fileUrl)" [alt]="getAltText(mediaItem)" class="media-image" />
+            } @else if (mediaItem.type === MediaType.Video) {
+              <video 
+                class="media-video" 
+                preload="none"
+                muted 
+                playsinline
+                loading="lazy"
+                (error)="onVideoError($event, mediaItem)"
+                (loadeddata)="onVideoLoaded($event)">
+                <source [src]="getMediaUrl(mediaItem.fileUrl)" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
               <div class="video-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z"/>
@@ -53,15 +63,11 @@
             }
           </div>
           <div class="media-info">
-            <p class="media-filename">{{ getFileName(mediaItem) }}</p>
-            @if (getAltText(mediaItem)) {
-              <p class="media-alt">{{ getAltText(mediaItem) }}</p>
-            }
             @if (getFileDescription(mediaItem)) {
               <p class="media-description">{{ getFileDescription(mediaItem) }}</p>
             }
           </div>
-          <button class="btn-delete" (click)="deleteMedia(mediaItem.FileId)">
+          <button class="btn-delete" (click)="$event.stopPropagation(); deleteMedia(mediaItem.id)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
@@ -94,9 +100,54 @@
         <form [formGroup]="mediaForm" (ngSubmit)="uploadMedia()" class="modal-form">
           <div class="form-group">
             <label>{{ translationService.currentLanguage() === 'uz' ? 'Fayl' : 'Файл' }}</label>
-            <input type="file" accept="image/*,video/*" (change)="onFileSelected($event)" class="input-file" />
-            @if (selectedFile()) {
-              <span class="file-name">{{ selectedFile()!.name }}</span>
+            
+            @if (!previewUrl()) {
+              <div 
+                class="upload-area"
+                [class.dragging]="isDragging()"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+                (click)="fileInput.click()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+                <p class="upload-text">
+                  {{ translationService.currentLanguage() === 'uz' ? 'Faylni bosing yoki bu yerga torting' : 'Нажмите или перетащите файл сюда' }}
+                </p>
+                <p class="upload-hint">
+                  {{ translationService.currentLanguage() === 'uz' ? 'Rasmlar (max 10MB) yoki Videolar (max 50MB)' : 'Изображения (макс 10MB) или Видео (макс 50MB)' }}
+                </p>
+              </div>
+              <input 
+                #fileInput
+                type="file" 
+                accept="image/*,video/*" 
+                (change)="onFileSelected($event)" 
+                class="input-file-hidden" />
+            } @else {
+              <div class="file-preview-container">
+                @if (isImage()) {
+                  <img [src]="previewUrl()" alt="Preview" class="media-preview-image" />
+                } @else if (isVideo()) {
+                  <video class="media-preview-video" controls>
+                    <source [src]="previewUrl()" [type]="selectedFile()!.type" />
+                    Your browser does not support the video tag.
+                  </video>
+                }
+                
+                <button type="button" class="btn-remove-file" (click)="removeSelectedFile()">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                  {{ translationService.currentLanguage() === 'uz' ? 'O\'chirish' : 'Удалить' }}
+                </button>
+                
+                <div class="file-info-preview">
+                  <span class="file-name-text">{{ selectedFile()!.name }}</span>
+                  <span class="file-size-text">{{ (selectedFile()!.size / 1024 / 1024).toFixed(2) }} MB</span>
+                </div>
+              </div>
             }
           </div>
 
@@ -143,6 +194,34 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  }
+
+  <!-- Lightbox for viewing media -->
+  @if (selectedMediaForView()) {
+    <div class="lightbox" (click)="closeMediaLightbox()">
+      <button class="lightbox-close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="lightbox-content" (click)="$event.stopPropagation()">
+        <div class="lightbox-media">
+          @if (selectedMediaForView()!.type === MediaType.Image) {
+            <img [src]="getMediaUrl(selectedMediaForView()!.fileUrl)" [alt]="getAltText(selectedMediaForView()!)" />
+          } @else if (selectedMediaForView()!.type === MediaType.Video) {
+            <video controls autoplay playsinline preload="auto">
+              <source [src]="getMediaUrl(selectedMediaForView()!.fileUrl)" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          }
+        </div>
+        @if (getFileDescription(selectedMediaForView()!)) {
+          <div class="lightbox-description">
+            <p>{{ getFileDescription(selectedMediaForView()!) }}</p>
+          </div>
+        }
       </div>
     </div>
   }

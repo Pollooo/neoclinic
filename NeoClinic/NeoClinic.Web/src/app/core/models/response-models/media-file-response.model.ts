@@ -1,10 +1,10 @@
 export interface GetMediaFilesResponse {
-    FileId: string;
-    FileDescriptionUz?: string;
-    FileDescriptionRu?: string;
-    AltTextUz?: string;
-    AltTextRu?: string;
-    FileUrl: string;
-    ContentType?: string;
-    Type: string;
+    id: string;  // Changed from fileId to match backend response
+    fileDescriptionUz?: string;
+    fileDescriptionRu?: string;
+    altTextUz?: string;
+    altTextRu?: string;
+    fileUrl: string;
+    contentType?: string;
+    type: number;  // Changed from string to number to match backend (0=Image, 1=Video)
 }

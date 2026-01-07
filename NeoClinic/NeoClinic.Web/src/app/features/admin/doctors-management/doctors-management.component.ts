@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslationService } from '../../../core/services/translation.service';
@@ -24,6 +24,12 @@ export class DoctorsManagementComponent implements OnInit {
   public isCreateMode = signal(false);
   public submitting = signal(false);
   public selectedFile = signal<File | null>(null);
+  public previewUrl = signal<string | null>(null);
+  public isDragging = signal(false);
+  public imageScale = signal(1);
+  public imagePosition = signal({ x: 0, y: 0 });
+  public isDraggingImage = signal(false);
+  public dragStartPos = signal({ x: 0, y: 0 });
 
   public doctorForm!: FormGroup;
 
@@ -60,19 +66,153 @@ export class DoctorsManagementComponent implements OnInit {
     this.isCreateMode.set(true);
     this.doctorForm.reset();
     this.selectedFile.set(null);
+    this.previewUrl.set(null);
+    this.resetImageAdjustments();
   }
 
   public cancelCreate(): void {
     this.isCreateMode.set(false);
     this.doctorForm.reset();
     this.selectedFile.set(null);
+    this.previewUrl.set(null);
+    this.resetImageAdjustments();
+  }
+
+  private resetImageAdjustments(): void {
+    this.imageScale.set(1);
+    this.imagePosition.set({ x: 0, y: 0 });
+    this.isDraggingImage.set(false);
   }
 
   public onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
-      this.selectedFile.set(input.files[0]);
+      this.processFile(input.files[0]);
     }
+  }
+
+  public onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(true);
+  }
+
+  public onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(false);
+  }
+
+  public onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(false);
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        this.processFile(file);
+      } else {
+        this.notificationService.showError(
+          this.translationService.currentLanguage() === 'uz' 
+            ? 'Faqat rasm fayllarini yuklash mumkin' 
+            : 'Можно загружать только изображения'
+        );
+      }
+    }
+  }
+
+  private processFile(file: File): void {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      this.notificationService.showError(
+        this.translationService.currentLanguage() === 'uz' 
+          ? 'Faqat rasm fayllarini yuklash mumkin' 
+          : 'Можно загружать только изображения'
+      );
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      this.notificationService.showError(
+        this.translationService.currentLanguage() === 'uz' 
+          ? 'Rasm hajmi 5MB dan oshmasligi kerak' 
+          : 'Размер изображения не должен превышать 5MB'
+      );
+      return;
+    }
+
+    this.selectedFile.set(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.previewUrl.set(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  public removeSelectedFile(): void {
+    this.selectedFile.set(null);
+    this.previewUrl.set(null);
+    this.resetImageAdjustments();
+  }
+
+  public onImageMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    this.isDraggingImage.set(true);
+    this.dragStartPos.set({
+      x: event.clientX - this.imagePosition().x,
+      y: event.clientY - this.imagePosition().y
+    });
+  }
+
+  public onImageMouseMove(event: MouseEvent): void {
+    if (!this.isDraggingImage()) return;
+    
+    event.preventDefault();
+    const newX = event.clientX - this.dragStartPos().x;
+    const newY = event.clientY - this.dragStartPos().y;
+    
+    this.imagePosition.set({ x: newX, y: newY });
+  }
+
+  public onImageMouseUp(): void {
+    this.isDraggingImage.set(false);
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onDocumentMouseMove(event: MouseEvent): void {
+    this.onImageMouseMove(event);
+  }
+
+  @HostListener('document:mouseup')
+  onDocumentMouseUp(): void {
+    this.onImageMouseUp();
+  }
+
+  public zoomIn(): void {
+    const newScale = Math.min(this.imageScale() + 0.1, 3);
+    this.imageScale.set(newScale);
+  }
+
+  public zoomOut(): void {
+    const newScale = Math.max(this.imageScale() - 0.1, 0.5);
+    this.imageScale.set(newScale);
+  }
+
+  public resetPosition(): void {
+    this.imagePosition.set({ x: 0, y: 0 });
+    this.imageScale.set(1);
+  }
+
+  public getImageTransform(): string {
+    const pos = this.imagePosition();
+    const scale = this.imageScale();
+    return `translate(${pos.x}px, ${pos.y}px) scale(${scale})`;
   }
 
   public saveDoctor(): void {
@@ -94,13 +234,13 @@ export class DoctorsManagementComponent implements OnInit {
     const formValue = this.doctorForm.value;
 
     const request = {
-      FullNameUz: formValue.fullNameUz,
-      BioUz: formValue.bioUz,
-      SpecialtyUz: formValue.specialtyUz,
-      FullNameRu: formValue.fullNameRu,
-      BioRu: formValue.bioRu,
-      SpecialtyRu: formValue.specialtyRu,
-      Photo: this.selectedFile()!
+      fullNameUz: formValue.fullNameUz,
+      bioUz: formValue.bioUz,
+      specialtyUz: formValue.specialtyUz,
+      fullNameRu: formValue.fullNameRu,
+      bioRu: formValue.bioRu,
+      specialtyRu: formValue.specialtyRu,
+      photo: this.selectedFile()!
     };
 
     this.apiService.createDoctorRequest(request).subscribe({
@@ -146,20 +286,20 @@ export class DoctorsManagementComponent implements OnInit {
 
   public getDoctorName(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? doctor.FullNameUz 
-      : doctor.FullNameRu;
+      ? doctor.fullNameUz 
+      : doctor.fullNameRu;
   }
 
   public getDoctorSpecialty(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (doctor.SpecialtyUz || '') 
-      : (doctor.SpecialtyRu || '');
+      ? (doctor.specialtyUz || '') 
+      : (doctor.specialtyRu || '');
   }
 
   public getDoctorBio(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (doctor.BioUz || '') 
-      : (doctor.BioRu || '');
+      ? (doctor.bioUz || '') 
+      : (doctor.bioRu || '');
   }
 }
 

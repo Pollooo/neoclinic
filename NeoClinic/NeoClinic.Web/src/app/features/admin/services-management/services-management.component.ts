@@ -74,11 +74,11 @@ export class ServicesManagementComponent implements OnInit {
     const formValue = this.serviceForm.value;
 
     const request = {
-      NameUz: formValue.nameUz,
-      DescriptionUz: formValue.descriptionUz || undefined,
-      NameRu: formValue.nameRu,
-      DescriptionRu: formValue.descriptionRu || undefined,
-      Price: formValue.price ? Number(formValue.price) : undefined
+      nameUz: formValue.nameUz,
+      descriptionUz: formValue.descriptionUz || undefined,
+      nameRu: formValue.nameRu,
+      descriptionRu: formValue.descriptionRu || undefined,
+      price: formValue.price ? Number(formValue.price) : undefined
     };
 
     this.apiService.createServiceRequest(request).subscribe({
@@ -117,21 +117,35 @@ export class ServicesManagementComponent implements OnInit {
         this.loadServices();
       },
       error: (error) => {
-        this.notificationService.showError(error.message);
+        // Check if the error is about linked appointments
+        const errorMessage = error.message || error.error || '';
+        if (errorMessage.toLowerCase().includes('appointment')) {
+          this.notificationService.showError(
+            this.translationService.currentLanguage() === 'uz'
+              ? 'Bu xizmatni o\'chirib bo\'lmaydi, chunki unga bog\'langan qabullar mavjud'
+              : 'Невозможно удалить эту услугу, так как к ней привязаны записи'
+          );
+        } else {
+          this.notificationService.showError(
+            this.translationService.currentLanguage() === 'uz'
+              ? 'Xizmatni o\'chirishda xatolik yuz berdi'
+              : 'Ошибка при удалении услуги'
+          );
+        }
       }
     });
   }
 
   public getServiceName(service: GetServicesResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? service.NameUz 
-      : service.NameRu;
+      ? service.nameUz 
+      : service.nameRu;
   }
 
   public getServiceDescription(service: GetServicesResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
-      ? (service.DescriptionUz || '') 
-      : (service.DescriptionRu || '');
+      ? (service.descriptionUz || '') 
+      : (service.descriptionRu || '');
   }
 }
 

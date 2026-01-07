@@ -38,9 +38,10 @@ public static class ContactMessageEndpoints
     }
 
     private static async Task<IResult> GetContactMessageAsync(
+        Guid? contactId,
         ISender sender)
     {
-        var result = await sender.Send(new GetContactMessageRequest());
-        return result is not null ? Results.Ok(result) : Results.NotFound();
+        var result = await sender.Send(new GetContactMessageRequest(contactId));
+        return Results.Ok(result);
     }
 }

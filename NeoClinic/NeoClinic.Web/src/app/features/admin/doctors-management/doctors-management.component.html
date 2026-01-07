@@ -13,10 +13,10 @@
     <div class="loading">{{ translationService.t('common.loading') }}</div>
   } @else if (doctors().length > 0) {
     <div class="doctors-grid">
-      @for (doctor of doctors(); track doctor.DoctorId) {
+      @for (doctor of doctors(); track doctor.doctorId) {
         <div class="doctor-card">
-          @if (doctor.PhotoUrl) {
-            <img [src]="doctor.PhotoUrl" [alt]="getDoctorName(doctor)" class="doctor-photo" />
+          @if (doctor.photoUrl) {
+            <img [src]="doctor.photoUrl" [alt]="getDoctorName(doctor)" class="doctor-photo" />
           } @else {
             <div class="doctor-photo-placeholder">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -29,7 +29,7 @@
             <p class="doctor-specialty">{{ getDoctorSpecialty(doctor) }}</p>
             <p class="doctor-bio">{{ getDoctorBio(doctor) }}</p>
           </div>
-          <button class="btn-delete" (click)="deleteDoctor(doctor.DoctorId)">
+          <button class="btn-delete" (click)="deleteDoctor(doctor.doctorId)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
@@ -98,9 +98,89 @@
 
           <div class="form-group">
             <label>{{ translationService.currentLanguage() === 'uz' ? 'Rasm' : 'Фото' }}</label>
-            <input type="file" accept="image/*" (change)="onFileSelected($event)" class="input-file" />
-            @if (selectedFile()) {
-              <span class="file-name">{{ selectedFile()!.name }}</span>
+            
+            @if (!previewUrl()) {
+              <div 
+                class="upload-area"
+                [class.dragging]="isDragging()"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+                (click)="fileInput.click()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+                <p class="upload-text">
+                  {{ translationService.currentLanguage() === 'uz' ? 'Rasmni bosing yoki bu yerga torting' : 'Нажмите или перетащите изображение сюда' }}
+                </p>
+                <p class="upload-hint">
+                  {{ translationService.currentLanguage() === 'uz' ? 'PNG, JPG, JPEG (max 5MB)' : 'PNG, JPG, JPEG (макс 5MB)' }}
+                </p>
+              </div>
+              <div class="upload-note">
+                <strong>💡 {{ translationService.currentLanguage() === 'uz' ? 'Maslahat' : 'Совет' }}:</strong>
+                {{ translationService.currentLanguage() === 'uz' 
+                  ? 'Yuz markazda bo\'lgan rasmni yuklang. Rasm doira shaklida ko\'rsatiladi.' 
+                  : 'Загрузите фото с лицом в центре. Изображение будет отображаться в круге.' }}
+              </div>
+              <input 
+                #fileInput
+                type="file" 
+                accept="image/*" 
+                (change)="onFileSelected($event)" 
+                class="input-file-hidden" />
+            } @else {
+              <div class="image-preview">
+                <div class="image-adjuster-container" 
+                     (mousemove)="onImageMouseMove($event)"
+                     (mouseup)="onImageMouseUp()"
+                     (mouseleave)="onImageMouseUp()">
+                  <div class="circular-crop-area">
+                    <img 
+                      [src]="previewUrl()" 
+                      alt="Preview" 
+                      class="preview-image-adjustable"
+                      [style.transform]="getImageTransform()"
+                      (mousedown)="onImageMouseDown($event)"
+                      draggable="false" />
+                  </div>
+                  <div class="adjustment-controls">
+                    <button type="button" class="control-btn" (click)="zoomOut()" title="Zoom Out">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6" />
+                      </svg>
+                    </button>
+                    <button type="button" class="control-btn" (click)="zoomIn()" title="Zoom In">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
+                      </svg>
+                    </button>
+                    <button type="button" class="control-btn" (click)="resetPosition()" title="Reset">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                      </svg>
+                    </button>
+                    <button type="button" class="control-btn btn-delete-image" (click)="removeSelectedFile()" title="{{ translationService.currentLanguage() === 'uz' ? 'O\'chirish' : 'Удалить' }}">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <p class="preview-instruction">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px; display: inline; vertical-align: text-bottom;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+                  </svg>
+                  {{ translationService.currentLanguage() === 'uz' ? 'Rasmni sudrab o\'rnini o\'zgartiring yoki zoom qiling' : 'Перетащите изображение или масштабируйте' }}
+                </p>
+                <p style="text-align: center; color: #667eea; font-size: 0.875rem; margin: 0.5rem 0; font-weight: 600;">
+                  {{ translationService.currentLanguage() === 'uz' ? '👁️ Foydalanuvchilar ko\'radigan ko\'rinish' : '👁️ Так увидят пользователи' }}
+                </p>
+                <div class="file-info">
+                  <span class="file-name-preview">{{ selectedFile()!.name }}</span>
+                  <span class="file-size">{{ (selectedFile()!.size / 1024).toFixed(2) }} KB</span>
+                </div>
+              </div>
             }
           </div>
 

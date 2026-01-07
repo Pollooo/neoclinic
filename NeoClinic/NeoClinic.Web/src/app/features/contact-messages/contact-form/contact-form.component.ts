@@ -6,6 +6,7 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { ApiService } from '../../../core/services/api.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CreateContactMessageRequest } from '../../../core/models/request-models/contact-message-request.model';
+import { GetContactMessageResponse } from '../../../core/models/response-models/contact-message-response.model';
 
 @Component({
   selector: 'app-contact-form',
@@ -23,9 +24,25 @@ export class ContactFormComponent implements OnInit {
 
   public submitting = signal(false);
   public contactForm!: FormGroup;
+  public contactInfo = signal<GetContactMessageResponse | null>(null);
 
   ngOnInit(): void {
     this.initializeForm();
+    this.loadContactInfo();
+  }
+
+  private loadContactInfo(): void {
+    this.apiService.getContactMessageRequest({}).subscribe({
+      next: (response) => {
+        console.log('Contact form info received:', response);
+        if (response) {
+          this.contactInfo.set(response);
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load contact form info:', error);
+      }
+    });
   }
 
   private initializeForm(): void {
@@ -48,12 +65,12 @@ export class ContactFormComponent implements OnInit {
 
     const formValue = this.contactForm.value;
     const request: CreateContactMessageRequest = {
-      Name: formValue.fullName,
-      Email: formValue.email,
-      PhoneNumber: formValue.phoneNumber,
-      AdditionalPhoneNumber: formValue.additionalPhoneNumber || undefined,
-      AboutClinicUz: formValue.message,  // Storing user message in AboutClinicUz temporarily
-      AboutClinicRu: formValue.message   // Storing user message in AboutClinicRu temporarily
+      name: formValue.fullName,
+      email: formValue.email,
+      phoneNumber: formValue.phoneNumber,
+      additionalPhoneNumber: formValue.additionalPhoneNumber || undefined,
+      aboutClinicUz: formValue.message,  // Storing user message in AboutClinicUz temporarily
+      aboutClinicRu: formValue.message   // Storing user message in AboutClinicRu temporarily
     };
 
     this.apiService.createContactMessageRequest(request).subscribe({

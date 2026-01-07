@@ -1,10 +1,10 @@
 export interface GetDoctorsResponse {
-    DoctorId: string;
-    FullNameUz: string;
-    SpecialtyUz?: string;
-    BioUz?: string;
-    FullNameRu: string;
-    SpecialtyRu?: string;
-    BioRu?: string;
-    PhotoUrl?: string;
+    doctorId: string;
+    fullNameUz: string;
+    specialtyUz?: string;
+    bioUz?: string;
+    fullNameRu: string;
+    specialtyRu?: string;
+    bioRu?: string;
+    photoUrl?: string;
 }

@@ -4,13 +4,15 @@ export interface DeleteMediaFileRequest {
     FileId: string;
 }
 
-export interface GetMediaFilesRequest {}
+export interface GetMediaFilesRequest {
+    fileId?: string;
+}
 
 export interface UploadMediaFileRequest {
-    FileDescriptionUz?: string;
-    FileDescriptionRu?: string;
-    AltTextUz?: string;
-    AltTextRu?: string;
-    Type: MediaType;
-    File: File;
+    fileDescriptionUz?: string;
+    fileDescriptionRu?: string;
+    altTextUz?: string;
+    altTextRu?: string;
+    type: MediaType;
+    file: File;
 }
