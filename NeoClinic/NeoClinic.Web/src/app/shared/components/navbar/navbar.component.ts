@@ -18,7 +18,7 @@ import { GetMediaFilesResponse } from '../../../core/models/response-models/medi
           <a [routerLink]="['/' + translationService.currentLanguage()]" class="brand-link">
             @if (logoUrl()) {
               @if (isVideoLogo()) {
-                <video [src]="logoUrl()" autoplay loop muted playsinline class="brand-logo"></video>
+                <video [src]="logoUrl() + '#t=0.1'" autoplay loop muted playsinline preload="metadata" class="brand-logo"></video>
               } @else {
                 <img [src]="logoUrl()" alt="Logo" class="brand-logo" />
               }

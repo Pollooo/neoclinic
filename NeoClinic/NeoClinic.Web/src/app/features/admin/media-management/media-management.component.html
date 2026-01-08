@@ -46,13 +46,14 @@
             } @else if (mediaItem.type === MediaType.Video) {
               <video 
                 class="media-video" 
-                preload="none"
+                preload="metadata"
                 muted 
                 playsinline
                 loading="lazy"
+                [attr.data-loaded]="false"
                 (error)="onVideoError($event, mediaItem)"
-                (loadeddata)="onVideoLoaded($event)">
-                <source [src]="getMediaUrl(mediaItem.fileUrl)" type="video/mp4" />
+                (loadedmetadata)="onVideoLoaded($event)">
+                <source [src]="getMediaUrl(mediaItem.fileUrl) + '#t=0.1'" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
               <div class="video-icon">

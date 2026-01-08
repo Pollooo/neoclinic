@@ -45,13 +45,14 @@
               <div class="video-thumbnail">
                 <video 
                   class="media-video" 
-                  preload="none"
+                  preload="metadata"
                   muted 
                   playsinline
                   loading="lazy"
+                  [attr.data-loaded]="false"
                   (error)="onVideoError($event, media)"
-                  (loadeddata)="onVideoLoaded($event)">
-                  <source [src]="getMediaUrl(media.fileUrl)" type="video/mp4" />
+                  (loadedmetadata)="onVideoLoaded($event)">
+                  <source [src]="getMediaUrl(media.fileUrl) + '#t=0.1'" type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
                 <div class="video-placeholder">

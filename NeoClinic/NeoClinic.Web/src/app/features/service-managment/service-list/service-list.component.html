@@ -8,15 +8,14 @@
       <div class="services-grid">
         @for (service of services(); track service.serviceId) {
           <div class="service-card">
-            <div class="service-header">
-              <h2 class="service-name">{{ translationService.currentLanguage() === 'uz' ? service.nameUz : service.nameRu }}</h2>
-              @if (service.price) {
-                <div class="service-price">{{ service.price }} UZS</div>
-              }
-            </div>
+            <h2 class="service-name">{{ translationService.currentLanguage() === 'uz' ? service.nameUz : service.nameRu }}</h2>
             
             @if (translationService.currentLanguage() === 'uz' ? service.descriptionUz : service.descriptionRu) {
               <p class="service-description">{{ translationService.currentLanguage() === 'uz' ? service.descriptionUz : service.descriptionRu }}</p>
+            }
+            
+            @if (service.price) {
+              <div class="service-price">{{ service.price }} UZS</div>
             }
             
             <div class="service-footer">

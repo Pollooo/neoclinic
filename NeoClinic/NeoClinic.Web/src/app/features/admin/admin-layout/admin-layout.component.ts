@@ -20,11 +20,18 @@ export class AdminLayoutComponent implements OnInit {
   private apiService = inject(ApiService);
   private router = inject(Router);
 
-  public sidebarOpen = signal(true);
+  public sidebarOpen = signal(false);
   public contactInfo = signal<GetContactMessageResponse | null>(null);
 
   ngOnInit(): void {
     this.loadContactInfo();
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
+  }
+
+  private checkScreenSize(): void {
+    const isDesktop = window.innerWidth > 1024;
+    this.sidebarOpen.set(isDesktop);
   }
 
   private loadContactInfo(): void {
@@ -40,6 +47,12 @@ export class AdminLayoutComponent implements OnInit {
 
   public toggleSidebar(): void {
     this.sidebarOpen.update(value => !value);
+  }
+
+  public closeSidebarOnMobile(): void {
+    if (window.innerWidth <= 1024) {
+      this.sidebarOpen.set(false);
+    }
   }
 
   public logout(): void {
