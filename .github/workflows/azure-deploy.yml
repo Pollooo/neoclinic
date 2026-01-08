@@ -3,8 +3,22 @@ name: Build & Push to Azure
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'NeoClinic/NeoClinic.Api/**'
+      - 'NeoClinic/NeoClinic.Application/**'
+      - 'NeoClinic/NeoClinic.Domain/**'
+      - 'NeoClinic/NeoClinic.Infrostructure/**'
+      - 'NeoClinic/Dockerfile'
+      - 'NeoClinic/docker-compose.yml'
+      - '.github/workflows/azure-deploy.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'NeoClinic/NeoClinic.Api/**'
+      - 'NeoClinic/NeoClinic.Application/**'
+      - 'NeoClinic/NeoClinic.Domain/**'
+      - 'NeoClinic/NeoClinic.Infrostructure/**'
+      - 'NeoClinic/Dockerfile'
   workflow_dispatch:
 
 env:
