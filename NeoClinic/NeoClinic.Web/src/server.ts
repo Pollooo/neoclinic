@@ -18,8 +18,9 @@ export function app(): express.Express {
   server.set('views', browserDistFolder);
 
   // Serve static files from /browser
-  server.get('*.*', express.static(browserDistFolder, {
-    maxAge: '1y'
+  server.use(express.static(browserDistFolder, {
+    maxAge: '1y',
+    index: false
   }));
 
   // All regular routes use the Angular engine
