@@ -40,12 +40,21 @@ jobs:
           docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
       
-      - name: Deploy to Azure App Service
+      - name: Azure Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: azure/webapps-deploy@v2
+        uses: azure/login@v1
         with:
-          app-name: ${{ secrets.AZURE_FRONTEND_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
-          images: |
-            ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Update App Service to use new image
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          az webapp config container set \
+            --name neoclinic-web-prod \
+            --resource-group clinic-project \
+            --container-image-name ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+          
+          az webapp restart \
+            --name neoclinic-web-prod \
+            --resource-group clinic-project
 
