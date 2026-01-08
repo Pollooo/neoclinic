@@ -125,7 +125,7 @@ export class HomeComponent implements OnInit {
   private loadGallery(): void {
     this.apiService.getMediaFilesRequest({}).subscribe({
       next: (media) => {
-        // Filter: only images (type 0), exclude background and clinic name images, take only first 6
+        // Filter: only images (type 0), exclude background, clinic name, and logo images, take only first 3
         const filteredMedia = media.filter(m => {
           const descUz = m.fileDescriptionUz?.toLowerCase() || '';
           const descRu = m.fileDescriptionRu?.toLowerCase() || '';
@@ -133,8 +133,10 @@ export class HomeComponent implements OnInit {
                  !descUz.includes('background') && 
                  !descRu.includes('background') && 
                  !descUz.includes('clinic name') && 
-                 !descRu.includes('clinic name');
-        }).slice(0, 6);
+                 !descRu.includes('clinic name') &&
+                 !descUz.includes('logo') && 
+                 !descRu.includes('logo');
+        }).slice(0, 3);
         this.galleryMedia.set(filteredMedia);
         this.galleryLoading.set(false);
       },

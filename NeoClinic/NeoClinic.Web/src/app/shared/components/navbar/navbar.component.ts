@@ -17,7 +17,11 @@ import { GetMediaFilesResponse } from '../../../core/models/response-models/medi
         <div class="navbar-brand">
           <a [routerLink]="['/' + translationService.currentLanguage()]" class="brand-link">
             @if (logoUrl()) {
-              <img [src]="logoUrl()" alt="Logo" class="brand-logo" />
+              @if (isVideoLogo()) {
+                <video [src]="logoUrl()" autoplay loop muted playsinline class="brand-logo"></video>
+              } @else {
+                <img [src]="logoUrl()" alt="Logo" class="brand-logo" />
+              }
             } @else {
               <span class="brand-text">{{ contactInfo()?.name || 'Clinic' }}</span>
             }
@@ -133,6 +137,11 @@ import { GetMediaFilesResponse } from '../../../core/models/response-models/medi
       height: 50px;
       width: auto;
       object-fit: contain;
+      display: block;
+    }
+    
+    video.brand-logo {
+      pointer-events: none;
     }
 
     .brand-text {
@@ -335,6 +344,8 @@ export class NavbarComponent implements OnInit {
   public mobileMenuOpen = signal(false);
   public contactInfo = signal<GetContactMessageResponse | null>(null);
   public logoUrl = signal<string | null>(null);
+  public logoMedia = signal<GetMediaFilesResponse | null>(null);
+  public isVideoLogo = signal<boolean>(false);
 
   ngOnInit(): void {
     this.loadContactInfo();
@@ -360,7 +371,10 @@ export class NavbarComponent implements OnInit {
           m.fileDescriptionRu?.toLowerCase().includes('clinic name')
         );
         if (logoMedia) {
+          this.logoMedia.set(logoMedia);
           this.logoUrl.set(logoMedia.fileUrl);
+          // Check if it's a video (type 1 is video)
+          this.isVideoLogo.set(logoMedia.type === 1);
         }
       },
       error: (error) => {

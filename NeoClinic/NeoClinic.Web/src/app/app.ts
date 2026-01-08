@@ -31,15 +31,15 @@ export class App implements OnInit {
       }
     });
 
-    // Load logo for favicon
+    // Load logo for browser tab favicon (looks for "logo" description)
     this.apiService.getMediaFilesRequest({}).subscribe({
       next: (media) => {
-        const logoMedia = media.find(m => 
-          m.fileDescriptionUz?.toLowerCase().includes('clinic name') || 
-          m.fileDescriptionRu?.toLowerCase().includes('clinic name')
+        const faviconMedia = media.find(m => 
+          m.fileDescriptionUz?.toLowerCase().includes('logo') || 
+          m.fileDescriptionRu?.toLowerCase().includes('logo')
         );
-        if (logoMedia) {
-          this.faviconService.setFavicon(logoMedia.fileUrl);
+        if (faviconMedia) {
+          this.faviconService.setFavicon(faviconMedia.fileUrl);
         }
       },
       error: (error) => {
