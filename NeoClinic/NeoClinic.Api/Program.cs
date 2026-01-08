@@ -22,7 +22,10 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("https://neoclinic-web-prod.azurewebsites.net")
+                .WithOrigins(
+                    "https://neoclinic-web-prod.azurewebsites.net",
+                    "http://localhost:4200"
+                )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
