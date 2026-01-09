@@ -1,7 +1,6 @@
 ﻿using NeoClinic.Api;
 using NeoClinic.Api.Endpoints;
 using NeoClinic.Application;
-using NeoClinic.Application.Common.Services.TelegramBotService.UpdateHandler;
 using NeoClinic.Infrostructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,25 +15,11 @@ builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
 });
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngular",
-        policy =>
-        {
-            policy
-                .WithOrigins(
-                    "https://neoclinic-web-prod.azurewebsites.net",
-                    "http://localhost:4200"
-                )
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
-});
+builder.Services.AddClinicCors();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.ApplyMigrations();
 }
@@ -52,17 +37,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-try
-{
-    var receiver = app.Services.GetRequiredService<TelegramBotReceiver>();
-    receiver.InitialStartReceiving();
-    Console.WriteLine("✅ Telegram bot started successfully");
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"⚠️ Warning: Telegram bot could not start: {ex.Message}");
-    Console.WriteLine("The API will continue to run, but Telegram features will be unavailable.");
-}
+app.StartTelegramBot();
 
 app.MapEndpoints();
 

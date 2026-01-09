@@ -258,7 +258,7 @@ public class CommandHandler(
 
         // Set manager
         user.IsManager = true;
-        user.IsManager = true;
+        user.IsAdmin = true;
         context.TelegramUsers.Update(user);
         await context.SaveChangesAsync();
 

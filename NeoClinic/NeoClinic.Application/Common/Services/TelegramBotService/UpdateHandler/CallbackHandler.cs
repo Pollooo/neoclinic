@@ -88,6 +88,7 @@ public class CallbackHandler(IApplicationDbContext context, ITelegramBotClient b
         if (action == "approve")
         {
             user.IsVarified = true;
+            user.IsAdmin = true;
 
             responseText = userLanguage switch
             {

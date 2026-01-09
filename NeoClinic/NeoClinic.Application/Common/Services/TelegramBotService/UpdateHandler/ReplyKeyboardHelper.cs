@@ -16,15 +16,13 @@ public static class ReplyKeyboardHelper
         return new ReplyKeyboardMarkup(
             lang switch
             {
-                Language.Russian => [
-                    ["➕ Добавить администратора"],
-                    ["❌ Удалить администратора"],
+                Language.Russian => 
+                [
                     ["📝 Создать профиль"],
                     ["📄 Получить профиль"]
                 ],
-                _ => [ // Default is Uzbek
-                    ["➕ Admin qo'shish"],
-                    ["❌ Adminni o'chirish"],
+                _ => 
+                [
                     ["📝 Profil yaratish"],
                     ["📄 Profil olish"]
                 ]

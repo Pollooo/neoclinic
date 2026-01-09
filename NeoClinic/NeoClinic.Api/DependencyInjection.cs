@@ -1,35 +1,57 @@
 ﻿using Microsoft.OpenApi;
-using NeoClinic.Application.Common.Services.TelegramBotService.UpdateHandler;
 
 namespace NeoClinic.Api;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddSwaggerGenWithAuth(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddSwaggerGen(options =>
+        public IServiceCollection AddSwaggerGenWithAuth()
         {
-            const string schemeId = "Bearer";
-
-            options.AddSecurityDefinition(schemeId, new OpenApiSecurityScheme
+            services.AddSwaggerGen(options =>
             {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                In = ParameterLocation.Header,
-                Description = "Enter your JWT token."
-            });
+                const string schemeId = "Bearer";
 
-            options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-            {
+                options.AddSecurityDefinition(schemeId, new OpenApiSecurityScheme
                 {
-                    new OpenApiSecuritySchemeReference(schemeId, document),
-                    new List<string>()
-                }
-            });
-        });
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter your JWT token."
+                });
 
-        return services;
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecuritySchemeReference(schemeId, document),
+                        new List<string>()
+                    }
+                });
+            });
+
+            return services;
+        }
+
+        public IServiceCollection AddClinicCors()
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngular", policy =>
+                {
+                    policy
+                        .WithOrigins(
+                            "https://neoclinic-web-prod.azurewebsites.net",
+                            "http://localhost:4200"
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
+            return services;
+        }
     }
 }
