@@ -5,11 +5,12 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { NotificationComponent } from '../../shared/components/notification/notification.component';
 import { ContactInfoComponent } from '../../shared/components/contact-info/contact-info.component';
+import { YandexMapComponent } from '../../shared/components/yandex-map/yandex-map.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationComponent, ContactInfoComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent, NotificationComponent, ContactInfoComponent, YandexMapComponent],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.css'
 })
