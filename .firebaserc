@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "clinic-c21c4"
+  },
+  "targets": {
+    "clinic-c21c4": {
+      "hosting": {
+        "frontend": [
+          "uzclinic"
+        ]
+      }
+    }
+  }
+}

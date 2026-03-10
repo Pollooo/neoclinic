@@ -1,4 +1,4 @@
 export const environment = {
     production: false,
-    apiBaseUrl: 'https://neoclinic-api-prod.azurewebsites.net/api',
+    apiBaseUrl: 'http://uzclinic.runasp.net/api',
 }

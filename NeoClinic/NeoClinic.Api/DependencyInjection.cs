@@ -43,7 +43,10 @@ public static class DependencyInjection
                     policy
                         .WithOrigins(
                             "https://neoclinic-web-prod.azurewebsites.net",
-                            "http://localhost:4200"
+                            "http://localhost:4200",
+                            "http://uzclinic.runasp.net",
+                            "https://localhost:7071",
+                            "https://uzclinic.web.app"
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()

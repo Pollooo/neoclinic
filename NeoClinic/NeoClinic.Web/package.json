@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:NeoClinic.Web": "node dist/NeoClinic.Web/server/server.mjs"
+    "serve:ssr:NeoClinic.Web": "node dist/NeoClinic.Web/server/server.mjs",
+    "deploy": "ng build --configuration production; Copy-Item dist/NeoClinic.Web/browser/index.csr.html dist/NeoClinic.Web/browser/index.html; Set-Location ../..; firebase deploy --only hosting:frontend; Set-Location NeoClinic/NeoClinic.Web"
   },
   "prettier": {
     "printWidth": 100,

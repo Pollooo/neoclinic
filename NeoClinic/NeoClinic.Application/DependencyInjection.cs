@@ -54,7 +54,8 @@ public static class DependencyInjection
             .AddPolicy("AdminPolicy", policy =>
                 policy.RequireRole("Admin"));
 
-        services.AddScoped<IStorageService, StorageService>();
+        //services.AddScoped<IStorageService, StorageService>();
+        services.AddScoped<IStorageService, FirebaseStorageService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICommandHandler, CommandHandler>();
         services.AddScoped<ICallbackHandler, CallbackHandler>();

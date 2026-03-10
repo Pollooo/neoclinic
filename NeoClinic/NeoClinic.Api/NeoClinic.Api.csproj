@@ -20,4 +20,10 @@
     <ProjectReference Include="..\NeoClinic.Infrostructure\NeoClinic.Infrostructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Keys\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
