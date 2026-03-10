@@ -1,6 +1,7 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, NavigationStart } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { TranslationService, Language } from '../../../core/services/translation.service';
 import { LocalStorageService } from '../../../core/services/local-storage.service';
 import { ApiService } from '../../../core/services/api.service';
@@ -52,20 +53,20 @@ import { GetMediaFilesResponse } from '../../../core/models/response-models/medi
         </div>
 
         <div class="navbar-menu" [class.active]="mobileMenuOpen()">
-          <a [routerLink]="['/' + translationService.currentLanguage()]" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+          <a [routerLink]="['/' + translationService.currentLanguage()]" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" (click)="closeMobileMenu()">
             {{ translationService.t('common.home') }}
           </a>
-          <a [routerLink]="['/' + translationService.currentLanguage() + '/services']" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="['/' + translationService.currentLanguage() + '/services']" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
             {{ translationService.t('common.services') }}
           </a>
-          <a [routerLink]="['/' + translationService.currentLanguage() + '/doctors']" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="['/' + translationService.currentLanguage() + '/doctors']" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
             {{ translationService.t('common.doctors') }}
           </a>
-          <a [routerLink]="['/' + translationService.currentLanguage() + '/gallery']" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="['/' + translationService.currentLanguage() + '/gallery']" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
             {{ translationService.t('common.gallery') }}
           </a>
           
-          <a [routerLink]="['/' + translationService.currentLanguage() + '/appointment/create']" class="btn btn-primary">
+          <a [routerLink]="['/' + translationService.currentLanguage() + '/appointment/create']" class="btn btn-primary" (click)="closeMobileMenu()">
             {{ translationService.t('common.appointment') }}
           </a>
 
@@ -338,9 +339,12 @@ import { GetMediaFilesResponse } from '../../../core/models/response-models/medi
     }
   `]
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   public translationService = inject(TranslationService);
   private apiService = inject(ApiService);
+  private router = inject(Router);
+  private routerSub!: Subscription;
+
   public mobileMenuOpen = signal(false);
   public contactInfo = signal<GetContactMessageResponse | null>(null);
   public logoUrl = signal<string | null>(null);
@@ -350,6 +354,16 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {
     this.loadContactInfo();
     this.loadLogo();
+    // Close menu on every navigation start (handles "View all" links outside the navbar too)
+    this.routerSub = this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.mobileMenuOpen.set(false);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
   }
 
   private loadContactInfo(): void {
@@ -385,6 +399,10 @@ export class NavbarComponent implements OnInit {
 
   public toggleMobileMenu(): void {
     this.mobileMenuOpen.update(value => !value);
+  }
+
+  public closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
   }
 
   public changeLanguage(language: Language): void {

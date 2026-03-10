@@ -1,4 +1,15 @@
 /* Global Styles */
+:root {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Modern skinny buttons */
+  --btn-padding-y: 0.5rem;
+  --btn-padding-x: 1.25rem;
+  --btn-radius: 10px;
+  --btn-font-weight: 600;
+  --btn-font-size: 0.9375rem;
+  --btn-letter-spacing: 0.01em;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -6,9 +17,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #1f2937;
@@ -22,6 +31,7 @@ html, body {
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 p {
@@ -37,8 +47,193 @@ button {
   font-family: inherit;
 }
 
+/* Modern skinny button base */
+button,
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  font-size: var(--btn-font-size);
+  font-weight: var(--btn-font-weight);
+  letter-spacing: var(--btn-letter-spacing);
+  border-radius: var(--btn-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled),
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:disabled,
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-lg {
+  padding: 0.625rem 1.5rem;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #334155;
+}
+
 input, textarea, select {
   font-family: inherit;
+}
+
+/* ─────────────────────────────────────────
+   Skeleton / Shimmer Loader
+───────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+
+/* Base shimmer class – apply to any block element */
+.sk {
+  display: block;
+  background: linear-gradient(90deg, #f3f4f6 0%, #e9ecef 40%, #f3f4f6 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* Reusable skeleton shapes */
+.sk-circle  { border-radius: 50%; }
+.sk-line    { height: 14px; width: 100%; }
+.sk-line-sm { height: 12px; }
+.sk-line-lg { height: 20px; }
+.sk-w-full  { width: 100%; }
+.sk-w-3q    { width: 75%; }
+.sk-w-half  { width: 50%; }
+.sk-w-third { width: 36%; }
+
+/* ─────────────────────────────────────────
+   Route / Page Progress Bar
+───────────────────────────────────────── */
+.page-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 99999;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.page-progress.active {
+  opacity: 1;
+}
+
+.page-progress-bar {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #667eea 0%, #a855f7 50%, #667eea 100%);
+  background-size: 200% 100%;
+  animation: pageProgressMove 1.2s linear infinite;
+  box-shadow: 0 0 14px rgba(102, 126, 234, 0.65);
+}
+
+@keyframes pageProgressMove {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ─────────────────────────────────────────
+   Scroll-to-top Button (global)
+───────────────────────────────────────── */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.45);
+  z-index: 900;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s ease;
+  pointer-events: none;
+}
+
+.scroll-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.scroll-top-btn:hover {
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.6);
+  transform: translateY(-2px);
+}
+
+.scroll-top-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ─────────────────────────────────────────
+   Section Entrance Animations (scroll-driven)
+───────────────────────────────────────── */
+@keyframes sectionFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .features,
+  .services-preview,
+  .doctors-preview,
+  .gallery-preview,
+  .cta {
+    animation: sectionFadeUp 0.65s ease both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
 }
 
 /* Scrollbar Styles */

@@ -3,7 +3,19 @@
     <h1 class="page-title">{{ translationService.t('doctors.title') }}</h1>
     
     @if (loading()) {
-      <div class="loading">{{ translationService.t('common.loading') }}</div>
+      <div class="doctors-grid" aria-hidden="true">
+        @for (_ of [1,2,3,4,5,6]; track $index) {
+          <div class="doctor-card skel-doctor-card">
+            <div class="sk sk-circle skel-photo"></div>
+            <div class="doctor-info" style="width:100%">
+              <div class="sk sk-line sk-line-lg sk-w-3q" style="margin:0 auto 0.75rem"></div>
+              <div class="sk sk-line sk-w-half" style="margin:0 auto 0.6rem"></div>
+              <div class="sk sk-line sk-w-full" style="margin-bottom:0.4rem"></div>
+              <div class="sk sk-line sk-w-3q" style="margin:0 auto"></div>
+            </div>
+          </div>
+        }
+      </div>
     } @else if (doctors().length > 0) {
       <div class="doctors-grid">
         @for (doctor of doctors(); track doctor.doctorId) {

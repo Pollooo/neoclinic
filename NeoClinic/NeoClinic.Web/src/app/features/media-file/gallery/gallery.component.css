@@ -292,6 +292,16 @@
   font-weight: 400;
 }
 
+.skel-gallery-card {
+  pointer-events: none;
+}
+
+.skel-gallery-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0;
+}
+
 .loading,
 .empty-state {
   text-align: center;

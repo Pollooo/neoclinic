@@ -416,3 +416,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Secret / credential files — never commit these
+**/Keys/
+**/ServiceAccountKey.json
+**/serviceAccountKey.json
+**/*secret*.json
+**/*credentials*.json

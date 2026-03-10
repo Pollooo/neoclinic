@@ -94,6 +94,18 @@
   margin: 0;
 }
 
+/* Skeleton specific shapes */
+.skel-doctor-card {
+  pointer-events: none;
+}
+
+.skel-photo {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+  margin-bottom: 1.5rem;
+}
+
 .loading,
 .empty-state {
   text-align: center;

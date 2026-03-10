@@ -88,6 +88,10 @@
   height: 100%;
 }
 
+.skel-service-card {
+  pointer-events: none;
+}
+
 .loading,
 .empty-state {
   text-align: center;

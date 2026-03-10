@@ -1,6 +1,96 @@
 <div class="home">
   <!-- Hero Section -->
   <section class="hero" [style.background-image]="backgroundImage() ? 'url(' + backgroundImage() + ')' : null">
+
+    <!-- Floating Medical Background Decorations -->
+    <div class="hero-bg-icons" aria-hidden="true">
+
+      <!-- Large Medical Cross – top-left -->
+      <div class="bg-icon bi-xl bi-1">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <rect x="9.5" y="1.5" width="5" height="21" rx="2.5"/>
+          <rect x="1.5" y="9.5" width="21" height="5" rx="2.5"/>
+        </svg>
+      </div>
+
+      <!-- Heart – top-right -->
+      <div class="bg-icon bi-lg bi-2">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
+
+      <!-- Circle ring – mid-left -->
+      <div class="bg-icon bi-lg bi-3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+      </div>
+
+      <!-- Small Cross – top-center -->
+      <div class="bg-icon bi-sm bi-4">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <rect x="9.5" y="1.5" width="5" height="21" rx="2.5"/>
+          <rect x="1.5" y="9.5" width="21" height="5" rx="2.5"/>
+        </svg>
+      </div>
+
+      <!-- Circle + cross (medical ⊕) – right-center -->
+      <div class="bg-icon bi-md bi-5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="7" x2="12" y2="17"/>
+          <line x1="7"  y1="12" x2="17" y2="12"/>
+        </svg>
+      </div>
+
+      <!-- Small heart – bottom-left -->
+      <div class="bg-icon bi-sm bi-6">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
+
+      <!-- Large circle ring – bottom-right -->
+      <div class="bg-icon bi-xl bi-7">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+      </div>
+
+      <!-- Medium cross – right-lower -->
+      <div class="bg-icon bi-md bi-8">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <rect x="9.5" y="1.5" width="5" height="21" rx="2.5"/>
+          <rect x="1.5" y="9.5" width="21" height="5" rx="2.5"/>
+        </svg>
+      </div>
+
+      <!-- Tiny heart – mid-top -->
+      <div class="bg-icon bi-xs bi-9">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
+
+      <!-- Medium ring – left-lower -->
+      <div class="bg-icon bi-md bi-10">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+      </div>
+
+      <!-- ECG / Heartbeat wave -->
+      <svg class="hero-ecg" viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,40 L80,40 L95,30 L110,40 L140,40 L143,44 L150,5 L158,62 L170,40 L185,28 L210,40 L290,40
+                 L370,40 L385,30 L400,40 L430,40 L433,44 L440,5 L448,62 L460,40 L475,28 L500,40 L580,40
+                 L660,40 L675,30 L690,40 L720,40 L723,44 L730,5 L738,62 L750,40 L765,28 L790,40 L870,40
+                 L950,40 L965,30 L980,40 L1010,40 L1013,44 L1020,5 L1028,62 L1040,40 L1055,28 L1080,40 L1160,40
+                 L1240,40 L1255,30 L1270,40 L1300,40 L1303,44 L1310,5 L1318,62 L1330,40 L1345,28 L1370,40 L1440,40"
+              stroke="white" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+
     <div class="hero-content">
       <h1 class="hero-title">{{ translationService.t('common.welcome') }}</h1>
       <p class="hero-subtitle">
@@ -30,7 +120,17 @@
       </div>
       
       @if (doctorsLoading()) {
-        <div class="loading">{{ translationService.t('common.loading') }}</div>
+        <div class="doctors-grid" aria-hidden="true">
+          @for (_ of [1,2,3]; track $index) {
+            <div class="doctor-card">
+              <div class="sk sk-circle" style="width:150px;height:150px;margin:0 auto 1.5rem"></div>
+              <div class="sk sk-line sk-line-lg sk-w-half" style="margin:0 auto 0.75rem"></div>
+              <div class="sk sk-line sk-w-third" style="margin:0 auto 0.5rem"></div>
+              <div class="sk sk-line sk-w-3q" style="margin:0 auto 0.5rem"></div>
+              <div class="sk sk-line sk-w-half" style="margin:0 auto"></div>
+            </div>
+          }
+        </div>
       } @else if (doctors().length > 0) {
         <div class="doctors-grid">
           @for (doctor of doctors().slice(0, 3); track doctor.doctorId) {
@@ -69,7 +169,17 @@
       </div>
       
       @if (servicesLoading()) {
-        <div class="loading">{{ translationService.t('common.loading') }}</div>
+        <div class="services-grid" aria-hidden="true">
+          @for (_ of [1,2,3]; track $index) {
+            <div class="service-card">
+              <div class="sk sk-line sk-line-lg sk-w-3q" style="margin-bottom:1rem"></div>
+              <div class="sk sk-line sk-w-full" style="margin-bottom:0.5rem"></div>
+              <div class="sk sk-line sk-w-3q" style="margin-bottom:0.5rem"></div>
+              <div class="sk sk-line sk-w-half" style="margin-bottom:1.25rem"></div>
+              <div class="sk sk-line sk-w-third" style="height:28px;border-radius:8px"></div>
+            </div>
+          }
+        </div>
       } @else if (services().length > 0) {
         <div class="services-grid">
           @for (service of services().slice(0, 3); track service.serviceId) {
@@ -99,7 +209,11 @@
       </div>
       
       @if (galleryLoading()) {
-        <div class="loading">{{ translationService.t('common.loading') }}</div>
+        <div class="gallery-grid" aria-hidden="true">
+          @for (_ of [1,2,3,4,5,6]; track $index) {
+            <div class="gallery-item sk" style="aspect-ratio:1;border-radius:12px"></div>
+          }
+        </div>
       } @else if (galleryMedia().length > 0) {
         <div class="gallery-grid">
           @for (media of galleryMedia(); track media.id) {
