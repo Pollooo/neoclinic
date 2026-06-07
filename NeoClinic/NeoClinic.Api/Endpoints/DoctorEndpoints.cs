@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using NeoClinic.Application.UserCases.Doctors.CreateDoctor;
 using NeoClinic.Application.UserCases.Doctors.DeleteDoctor;
 using NeoClinic.Application.UserCases.Doctors.GetDoctors;
+using NeoClinic.Application.UserCases.Doctors.UpdateDoctor;
+using NeoClinic.Application.UserCases.Doctors.UpdateDoctorPhoto;
 
 namespace NeoClinic.Api.Endpoints;
 
@@ -15,6 +17,11 @@ public static class DoctorEndpoints
              .DisableAntiforgery()
              .RequireAuthorization("AdminPolicy");
         app.MapDelete($"{GroupName}/delete/{{doctorId:guid}}", DeleteDoctorAsync)
+            .RequireAuthorization("AdminPolicy");
+        app.MapPut($"{GroupName}/update", UpdateDoctorAsync)
+            .RequireAuthorization("AdminPolicy");
+        app.MapPut($"{GroupName}/update-photo", UpdateDoctorPhotoAsync)
+            .DisableAntiforgery()
             .RequireAuthorization("AdminPolicy");
         app.MapGet($"{GroupName}/get", GetDoctorsAsync);
     }
@@ -32,6 +39,22 @@ public static class DoctorEndpoints
         ISender sender)
     {
         var request = new DeleteDoctorRequest(doctorId);
+        var result = await sender.Send(request);
+        return result ? Results.Ok(true) : Results.BadRequest(false);
+    }
+
+    private static async Task<IResult> UpdateDoctorAsync(
+        UpdateDoctorRequest request,
+        ISender sender)
+    {
+        var result = await sender.Send(request);
+        return result ? Results.Ok(true) : Results.BadRequest(false);
+    }
+
+    private static async Task<IResult> UpdateDoctorPhotoAsync(
+        [FromForm] UpdateDoctorPhotoRequest request,
+        ISender sender)
+    {
         var result = await sender.Send(request);
         return result ? Results.Ok(true) : Results.BadRequest(false);
     }

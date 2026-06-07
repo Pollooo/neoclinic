@@ -22,6 +22,7 @@ export class ServicesManagementComponent implements OnInit {
   public services = signal<GetServicesResponse[]>([]);
   public loading = signal(true);
   public isCreateMode = signal(false);
+  public editingService = signal<GetServicesResponse | null>(null);
   public submitting = signal(false);
 
   public serviceForm!: FormGroup;
@@ -56,11 +57,25 @@ export class ServicesManagementComponent implements OnInit {
 
   public openCreateMode(): void {
     this.isCreateMode.set(true);
+    this.editingService.set(null);
     this.serviceForm.reset();
+  }
+
+  public openEditMode(service: GetServicesResponse): void {
+    this.isCreateMode.set(true);
+    this.editingService.set(service);
+    this.serviceForm.patchValue({
+      nameUz: service.nameUz,
+      descriptionUz: service.descriptionUz || '',
+      nameRu: service.nameRu,
+      descriptionRu: service.descriptionRu || '',
+      price: service.price !== undefined && service.price !== null ? service.price : ''
+    });
   }
 
   public cancelCreate(): void {
     this.isCreateMode.set(false);
+    this.editingService.set(null);
     this.serviceForm.reset();
   }
 
@@ -72,32 +87,64 @@ export class ServicesManagementComponent implements OnInit {
 
     this.submitting.set(true);
     const formValue = this.serviceForm.value;
+    const editingService = this.editingService();
 
-    const request = {
-      nameUz: formValue.nameUz,
-      descriptionUz: formValue.descriptionUz || undefined,
-      nameRu: formValue.nameRu,
-      descriptionRu: formValue.descriptionRu || undefined,
-      price: formValue.price ? Number(formValue.price) : undefined
-    };
+    if (editingService) {
+      const request = {
+        id: editingService.serviceId,
+        nameUz: formValue.nameUz,
+        descriptionUz: formValue.descriptionUz || undefined,
+        nameRu: formValue.nameRu,
+        descriptionRu: formValue.descriptionRu || undefined,
+        price: formValue.price ? Number(formValue.price) : undefined
+      };
 
-    this.apiService.createServiceRequest(request).subscribe({
-      next: () => {
-        this.notificationService.showSuccess(
-          this.translationService.currentLanguage() === 'uz' 
-            ? 'Xizmat qo\'shildi' 
-            : 'Услуга добавлена'
-        );
-        this.loadServices();
-        this.cancelCreate();
-      },
-      error: (error) => {
-        this.notificationService.showError(error.message);
-      },
-      complete: () => {
-        this.submitting.set(false);
-      }
-    });
+      this.apiService.updateServiceRequest(request).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            this.translationService.currentLanguage() === 'uz' 
+              ? 'Xizmat yangilandi' 
+              : 'Услуга обновлена'
+          );
+          this.loadServices();
+          this.cancelCreate();
+        },
+        error: (error) => {
+          this.notificationService.showError(error.message);
+          this.submitting.set(false);
+        },
+        complete: () => {
+          this.submitting.set(false);
+        }
+      });
+    } else {
+      const request = {
+        nameUz: formValue.nameUz,
+        descriptionUz: formValue.descriptionUz || undefined,
+        nameRu: formValue.nameRu,
+        descriptionRu: formValue.descriptionRu || undefined,
+        price: formValue.price ? Number(formValue.price) : undefined
+      };
+
+      this.apiService.createServiceRequest(request).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            this.translationService.currentLanguage() === 'uz' 
+              ? 'Xizmat qo\'shildi' 
+              : 'Услуга добавлена'
+          );
+          this.loadServices();
+          this.cancelCreate();
+        },
+        error: (error) => {
+          this.notificationService.showError(error.message);
+          this.submitting.set(false);
+        },
+        complete: () => {
+          this.submitting.set(false);
+        }
+      });
+    }
   }
 
   public deleteService(serviceId: string): void {

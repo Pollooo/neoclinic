@@ -13,3 +13,12 @@ export interface DeleteServiceRequest {
 export interface GetServicesRequest {
     serviceId?: string;
 }
+
+export interface UpdateServiceRequest {
+    id: string;
+    nameUz: string;
+    descriptionUz?: string;
+    nameRu: string;
+    descriptionRu?: string;
+    price?: number;
+}

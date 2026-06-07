@@ -1,8 +1,9 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using NeoClinic.Application.UserCases.Services.Create;
 using NeoClinic.Application.UserCases.Services.Delete;
 using NeoClinic.Application.UserCases.Services.Get;
+using NeoClinic.Application.UserCases.Services.Update;
 
 namespace NeoClinic.Api.Endpoints;
 
@@ -13,6 +14,9 @@ public static class ServiceManagmentEndpoints
     public static void MapServiceEndpoints(this WebApplication app)
     {
         app.MapPost($"{GroupName}/create", CreateServiceAsync)
+           .RequireAuthorization("AdminPolicy");
+
+        app.MapPut($"{GroupName}/update", UpdateServiceAsync)
            .RequireAuthorization("AdminPolicy");
 
         app.MapDelete($"{GroupName}/delete/{{serviceId:guid}}", DeleteServiceAsync)
@@ -49,5 +53,13 @@ public static class ServiceManagmentEndpoints
     {
         var result = await sender.Send(new GetServicesRequest(serviceId));
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> UpdateServiceAsync(
+        UpdateServiceRequest request,
+        ISender sender)
+    {
+        var result = await sender.Send(request);
+        return result ? Results.Ok(true) : Results.NotFound(false);
     }
 }

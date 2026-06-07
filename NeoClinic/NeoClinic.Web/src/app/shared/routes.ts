@@ -14,6 +14,8 @@ export const routes = {
     doctors: {
         create: 'doctors/create',
         delete: (doctorId: string) => `doctors/delete/${doctorId}`,
+        update: 'doctors/update',
+        updatePhoto: 'doctors/update-photo',
         get: 'doctors/get',
     },
     media_files: {
@@ -23,6 +25,7 @@ export const routes = {
     },
     services: {
         create: 'services/create',
+        update: 'services/update',
         delete: (serviceId: string) => `services/delete/${serviceId}`,
         get: 'services/get',
     },

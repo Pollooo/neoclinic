@@ -29,11 +29,20 @@
             <p class="doctor-specialty">{{ getDoctorSpecialty(doctor) }}</p>
             <p class="doctor-bio">{{ getDoctorBio(doctor) }}</p>
           </div>
-          <button class="btn-delete" (click)="deleteDoctor(doctor.doctorId)">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-            </svg>
-          </button>
+          <div class="doctor-actions">
+            <button class="btn-edit" (click)="openEditMode(doctor)" title="Edit">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+              </svg>
+              {{ translationService.currentLanguage() === 'uz' ? 'Tahrirlash' : 'Изменить' }}
+            </button>
+            <button class="btn-delete" (click)="deleteDoctor(doctor.doctorId)" title="Delete">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              </svg>
+              {{ translationService.currentLanguage() === 'uz' ? "O'chirish" : 'Удалить' }}
+            </button>
+          </div>
         </div>
       }
     </div>
@@ -46,13 +55,21 @@
     </div>
   }
 
-  <!-- Create Modal -->
+  <!-- Doctor Modal -->
   @if (isCreateMode()) {
     <div class="modal-overlay" (click)="cancelCreate()">
       <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
         <div class="modal-header">
-          <h2>{{ translationService.currentLanguage() === 'uz' ? 'Shifokor qo\'shish' : 'Добавить врача' }}</h2>
-          <button class="modal-close" (click)="cancelCreate()">
+          <h2>
+            @if (editingDoctor()) {
+              {{ translationService.currentLanguage() === 'uz' ? 'Shifokorni tahrirlash' : 'Редактировать врача' }}
+            } @else {
+              {{ translationService.currentLanguage() === 'uz' ? "Shifokor qo'shish" : 'Добавить врача' }}
+            }
+          </h2>
+          <button class="modal-close" type="button" (click)="cancelCreate()" aria-label="Close">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -60,141 +77,213 @@
         </div>
 
         <form [formGroup]="doctorForm" (ngSubmit)="saveDoctor()" class="modal-form">
+
+          <!-- Uzbek fields -->
           <div class="form-section">
-            <h3>O'zbekcha / Uzbek</h3>
-            <div class="form-group">
-              <label>{{ translationService.currentLanguage() === 'uz' ? 'To\'liq ism' : 'Полное имя' }}</label>
-              <input type="text" formControlName="fullNameUz" class="input" />
+            <h3>🇺🇿 O'zbekcha</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>{{ translationService.currentLanguage() === 'uz' ? "To'liq ism" : 'Полное имя' }}</label>
+                <input type="text" formControlName="fullNameUz" class="input" />
+              </div>
+              <div class="form-group">
+                <label>{{ translationService.currentLanguage() === 'uz' ? 'Mutaxassislik' : 'Специализация' }}</label>
+                <input type="text" formControlName="specialtyUz" class="input" />
+              </div>
             </div>
-
-            <div class="form-group">
-              <label>{{ translationService.currentLanguage() === 'uz' ? 'Mutaxassislik' : 'Специализация' }}</label>
-              <input type="text" formControlName="specialtyUz" class="input" />
-            </div>
-
             <div class="form-group">
               <label>{{ translationService.currentLanguage() === 'uz' ? 'Biografiya' : 'Биография' }}</label>
               <textarea formControlName="bioUz" class="input" rows="3"></textarea>
             </div>
           </div>
 
+          <!-- Russian fields -->
           <div class="form-section">
-            <h3>Русский / Russian</h3>
-            <div class="form-group">
-              <label>{{ translationService.currentLanguage() === 'uz' ? 'To\'liq ism' : 'Полное имя' }}</label>
-              <input type="text" formControlName="fullNameRu" class="input" />
+            <h3>🇷🇺 Русский</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>{{ translationService.currentLanguage() === 'uz' ? "To'liq ism" : 'Полное имя' }}</label>
+                <input type="text" formControlName="fullNameRu" class="input" />
+              </div>
+              <div class="form-group">
+                <label>{{ translationService.currentLanguage() === 'uz' ? 'Mutaxassislik' : 'Специализация' }}</label>
+                <input type="text" formControlName="specialtyRu" class="input" />
+              </div>
             </div>
-
-            <div class="form-group">
-              <label>{{ translationService.currentLanguage() === 'uz' ? 'Mutaxassislik' : 'Специализация' }}</label>
-              <input type="text" formControlName="specialtyRu" class="input" />
-            </div>
-
             <div class="form-group">
               <label>{{ translationService.currentLanguage() === 'uz' ? 'Biografiya' : 'Биография' }}</label>
               <textarea formControlName="bioRu" class="input" rows="3"></textarea>
             </div>
           </div>
 
-          <div class="form-group">
-            <label>{{ translationService.currentLanguage() === 'uz' ? 'Rasm' : 'Фото' }}</label>
-            
+          <!-- Photo section -->
+          <div class="photo-section">
+            <div class="photo-section-header">
+              <span class="photo-label">
+                📸 {{ translationService.currentLanguage() === 'uz' ? 'Shifokor rasmi' : 'Фото врача' }}
+              </span>
+              @if (previewUrl()) {
+                <button type="button" class="btn-change-photo" (click)="fileInput.click()">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
+                  </svg>
+                  {{ translationService.currentLanguage() === 'uz' ? 'Rasmni almashtirish' : 'Изменить фото' }}
+                </button>
+              }
+            </div>
+
+            <!-- Drop zone (no file yet) -->
             @if (!previewUrl()) {
-              <div 
+              <div
                 class="upload-area"
-                [class.dragging]="isDragging()"
+                [class.dragging]="isDraggingZone()"
                 (dragover)="onDragOver($event)"
                 (dragleave)="onDragLeave($event)"
                 (drop)="onDrop($event)"
                 (click)="fileInput.click()">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                </svg>
-                <p class="upload-text">
-                  {{ translationService.currentLanguage() === 'uz' ? 'Rasmni bosing yoki bu yerga torting' : 'Нажмите или перетащите изображение сюда' }}
-                </p>
-                <p class="upload-hint">
-                  {{ translationService.currentLanguage() === 'uz' ? 'PNG, JPG, JPEG (max 5MB)' : 'PNG, JPG, JPEG (макс 5MB)' }}
-                </p>
-              </div>
-              <div class="upload-note">
-                <strong>💡 {{ translationService.currentLanguage() === 'uz' ? 'Maslahat' : 'Совет' }}:</strong>
-                {{ translationService.currentLanguage() === 'uz' 
-                  ? 'Yuz markazda bo\'lgan rasmni yuklang. Rasm doira shaklida ko\'rsatiladi.' 
-                  : 'Загрузите фото с лицом в центре. Изображение будет отображаться в круге.' }}
-              </div>
-              <input 
-                #fileInput
-                type="file" 
-                accept="image/*" 
-                (change)="onFileSelected($event)" 
-                class="input-file-hidden" />
-            } @else {
-              <div class="image-preview">
-                <div class="image-adjuster-container" 
-                     (mousemove)="onImageMouseMove($event)"
-                     (mouseup)="onImageMouseUp()"
-                     (mouseleave)="onImageMouseUp()">
-                  <div class="circular-crop-area">
-                    <img 
-                      [src]="previewUrl()" 
-                      alt="Preview" 
-                      class="preview-image-adjustable"
-                      [style.transform]="getImageTransform()"
-                      (mousedown)="onImageMouseDown($event)"
-                      draggable="false" />
-                  </div>
-                  <div class="adjustment-controls">
-                    <button type="button" class="control-btn" (click)="zoomOut()" title="Zoom Out">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6" />
-                      </svg>
-                    </button>
-                    <button type="button" class="control-btn" (click)="zoomIn()" title="Zoom In">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
-                      </svg>
-                    </button>
-                    <button type="button" class="control-btn" (click)="resetPosition()" title="Reset">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                      </svg>
-                    </button>
-                    <button type="button" class="control-btn btn-delete-image" (click)="removeSelectedFile()" title="{{ translationService.currentLanguage() === 'uz' ? 'O\'chirish' : 'Удалить' }}">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <p class="preview-instruction">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px; display: inline; vertical-align: text-bottom;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+                <div class="upload-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                   </svg>
-                  {{ translationService.currentLanguage() === 'uz' ? 'Rasmni sudrab o\'rnini o\'zgartiring yoki zoom qiling' : 'Перетащите изображение или масштабируйте' }}
-                </p>
-                <p style="text-align: center; color: #667eea; font-size: 0.875rem; margin: 0.5rem 0; font-weight: 600;">
-                  {{ translationService.currentLanguage() === 'uz' ? '👁️ Foydalanuvchilar ko\'radigan ko\'rinish' : '👁️ Так увидят пользователи' }}
-                </p>
-                <div class="file-info">
-                  <span class="file-name-preview">{{ selectedFile()!.name }}</span>
-                  <span class="file-size">{{ (selectedFile()!.size / 1024).toFixed(2) }} KB</span>
                 </div>
+                <p class="upload-text">
+                  {{ translationService.currentLanguage() === 'uz' ? 'Bosing yoki rasmni bu yerga torting' : 'Нажмите или перетащите фото сюда' }}
+                </p>
+                <p class="upload-hint">PNG, JPG, JPEG — {{ translationService.currentLanguage() === 'uz' ? 'max 5 MB' : 'макс 5 МБ' }}</p>
               </div>
             }
-          </div>
 
+            <!-- Image adjuster (file selected) -->
+            @if (previewUrl()) {
+              <div class="adjuster-wrapper">
+
+                <!-- Left: circle preview -->
+                <div class="adjuster-left">
+                  <p class="adjuster-label">
+                    {{ translationService.currentLanguage() === 'uz' ? "Ko'rinishi" : 'Предпросмотр' }}
+                  </p>
+                  <div
+                    class="crop-circle"
+                    (mousedown)="onMouseDown($event)"
+                    (touchstart)="onTouchStart($event)"
+                    (wheel)="onWheelZoom($event)"
+                    title="{{ translationService.currentLanguage() === 'uz' ? 'Sudrang yoki scroll qiling' : 'Перетащите или прокрутите' }}">
+                    <img
+                      [src]="previewUrl()"
+                      alt="Preview"
+                      class="crop-img"
+                      [style.transform]="getImageTransform()"
+                      draggable="false" />
+                    <div class="crop-circle-border"></div>
+                  </div>
+                  <p class="adjuster-hint">
+                    {{ translationService.currentLanguage() === 'uz'
+                      ? '🖱️ Sudrang · Scroll = zoom'
+                      : '🖱️ Перетащите · Колёсико = масштаб' }}
+                  </p>
+                </div>
+
+                <!-- Right: controls -->
+                <div class="adjuster-right">
+                  <p class="adjuster-label">
+                    {{ translationService.currentLanguage() === 'uz' ? 'Boshqaruv' : 'Управление' }}
+                  </p>
+
+                  <!-- Zoom controls -->
+                  <div class="control-group">
+                    <span class="control-group-label">
+                      {{ translationService.currentLanguage() === 'uz' ? 'Zoom' : 'Масштаб' }}
+                    </span>
+                    <div class="zoom-row">
+                      <button type="button" class="ctrl-btn ctrl-btn--secondary" (click)="zoomOut()" title="Zoom out (-)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                        </svg>
+                      </button>
+                      <div class="zoom-track">
+                        <div class="zoom-bar" [style.width.%]="(imageScale() - 0.5) / 3.5 * 100"></div>
+                      </div>
+                      <button type="button" class="ctrl-btn ctrl-btn--secondary" (click)="zoomIn()" title="Zoom in (+)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
+                        </svg>
+                      </button>
+                      <span class="zoom-label">{{ scalePercent }}%</span>
+                    </div>
+                  </div>
+
+                  <!-- Action buttons -->
+                  <div class="control-group">
+                    <span class="control-group-label">
+                      {{ translationService.currentLanguage() === 'uz' ? 'Amallar' : 'Действия' }}
+                    </span>
+                    <div class="action-btns">
+                      <button type="button" class="ctrl-btn ctrl-btn--outline" (click)="resetAdjust()" title="Reset position & zoom">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        {{ translationService.currentLanguage() === 'uz' ? 'Qayta tiklash' : 'Сбросить' }}
+                      </button>
+                      <button type="button" class="ctrl-btn ctrl-btn--danger" (click)="removeSelectedFile()" title="Remove photo">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                        {{ translationService.currentLanguage() === 'uz' ? "Rasmni o'chirish" : 'Удалить фото' }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Info chip -->
+                  <div class="adjuster-info">
+                    @if (hasNewFile() && selectedFile()) {
+                      <span class="info-chip info-chip--new">
+                        ✅ {{ selectedFile()!.name }} · {{ (selectedFile()!.size / 1024).toFixed(0) }} KB
+                      </span>
+                      <span class="info-chip info-chip--note">
+                        {{ translationService.currentLanguage() === 'uz'
+                          ? '💡 Saqlashda ko\'rinish canvas orqali kesilib yuklanadi'
+                          : '💡 При сохранении — кадр будет обрезан по кругу' }}
+                      </span>
+                    } @else {
+                      <span class="info-chip info-chip--existing">
+                        🖼️ {{ translationService.currentLanguage() === 'uz' ? 'Joriy rasm' : 'Текущее фото' }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+              </div><!-- /adjuster-wrapper -->
+            }
+
+            <!-- Hidden file input -->
+            <input
+              #fileInput
+              type="file"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+              class="input-file-hidden" />
+          </div><!-- /photo-section -->
+
+          <!-- Modal footer -->
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="cancelCreate()">
               {{ translationService.t('common.cancel') }}
             </button>
             <button type="submit" class="btn btn-primary" [disabled]="doctorForm.invalid || submitting()">
-              {{ submitting() ? translationService.t('common.loading') : translationService.t('common.save') }}
+              @if (submitting()) {
+                <span class="spinner"></span>
+                {{ translationService.currentLanguage() === 'uz' ? 'Saqlanmoqda...' : 'Сохранение...' }}
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4Z M12 17v-6 M9 14l3 3 3-3" />
+                </svg>
+                {{ translationService.t('common.save') }}
+              }
             </button>
           </div>
         </form>
+
       </div>
     </div>
   }
 </div>
-

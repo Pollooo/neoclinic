@@ -8,10 +8,10 @@ import { CreateAppointmentRequest, GetAppointmentsRequest } from "../models/requ
 import { GetAppointmentResponse } from "../models/response-models/appointment-response.model";
 import { CreateContactMessageRequest, GetContactMessageRequest, UpdateContactMessageRequest } from "../models/request-models/contact-message-request.model";
 import { GetContactMessageResponse } from "../models/response-models/contact-message-response.model";
-import { CreateDoctorRequest, DeleteDoctorRequest, GetDoctorsRequest } from "../models/request-models/doctor-request.mode";
+import { CreateDoctorRequest, DeleteDoctorRequest, GetDoctorsRequest, UpdateDoctorPhotoRequest, UpdateDoctorRequest } from "../models/request-models/doctor-request.mode";
 import { GetDoctorsResponse } from "../models/response-models/doctor-response.model";
 import { DeleteMediaFileRequest, GetMediaFilesRequest, UploadMediaFileRequest } from "../models/request-models/media-file-request.mode";
-import { CreateServiceRequest, DeleteServiceRequest, GetServicesRequest } from "../models/request-models/service-request.modet";
+import { CreateServiceRequest, DeleteServiceRequest, GetServicesRequest, UpdateServiceRequest } from "../models/request-models/service-request.modet";
 import { GetServicesResponse } from "../models/response-models/service-response.model";
 import { GetMediaFilesResponse } from "../models/response-models/media-file-response.model";
 import { HttpParams } from "@angular/common/http";
@@ -73,6 +73,26 @@ import { HttpParams } from "@angular/common/http";
         return this.httpService.delete<boolean>(routes.doctors.delete(request.DoctorId));
     }
 
+    public updateDoctorRequest(request: UpdateDoctorRequest): Observable<boolean> {
+        return this.httpService.put<boolean>(routes.doctors.update, {
+            doctorId: request.doctorId,
+            fullNameUz: request.fullNameUz,
+            bioUz: request.bioUz,
+            specialtyUz: request.specialtyUz,
+            fullNameRu: request.fullNameRu,
+            bioRu: request.bioRu,
+            specialtyRu: request.specialtyRu
+        });
+    }
+
+    public updateDoctorPhotoRequest(request: UpdateDoctorPhotoRequest): Observable<boolean> {
+        const formData = new FormData();
+        formData.append('DoctorId', request.doctorId);
+        formData.append('Photo', request.photo, request.photo.name);
+
+        return this.httpService.put<boolean>(routes.doctors.updatePhoto, formData);
+    }
+
     public getDoctorsRequest(request: GetDoctorsRequest): Observable<GetDoctorsResponse[]> {
         let params = new HttpParams();
         if (request.doctorId) {
@@ -115,6 +135,10 @@ import { HttpParams } from "@angular/common/http";
 
     public createServiceRequest(request: CreateServiceRequest): Observable<boolean> {
         return this.httpService.post<boolean>(routes.services.create, request);
+    }
+
+    public updateServiceRequest(request: UpdateServiceRequest): Observable<boolean> {
+        return this.httpService.put<boolean>(routes.services.update, request);
     }
 
     public deleteServiceRequest(request: DeleteServiceRequest): Observable<boolean> {

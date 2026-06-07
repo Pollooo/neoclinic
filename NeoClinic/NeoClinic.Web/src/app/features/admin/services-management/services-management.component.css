@@ -50,6 +50,13 @@
   margin: 0;
 }
 
+.service-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .services-grid {
     grid-template-columns: 1fr;

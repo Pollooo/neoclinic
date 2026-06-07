@@ -3,6 +3,7 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Configuration;
 using NeoClinic.Application.Common.Interfaces;
 using NeoClinic.Domain.Enums;
+using System.IO;
 
 namespace NeoClinic.Application.Common.Services;
 
@@ -21,7 +22,65 @@ public class FirebaseStorageService : IStorageService
             throw new ArgumentNullException("Firebase:CredentialsPath configuration is missing");
         }
 
-        var credential = GoogleCredential.FromFile(credentialsPath);
+        string resolvedPath = credentialsPath;
+        if (!Path.IsPathRooted(resolvedPath))
+        {
+            // 1. Try resolving relative to AppContext.BaseDirectory
+            var baseDirectoryPath = Path.Combine(AppContext.BaseDirectory, resolvedPath);
+            if (File.Exists(baseDirectoryPath))
+            {
+                resolvedPath = baseDirectoryPath;
+            }
+            else
+            {
+                // 2. Traverse up parent directories to look for solution directory or keys folder
+                var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
+                string? foundPath = null;
+                while (currentDir != null)
+                {
+                    var slnFiles = currentDir.GetFiles("*.sln*");
+                    var slnxFiles = currentDir.GetFiles("*.slnx");
+                    if (slnFiles.Length > 0 || slnxFiles.Length > 0 || currentDir.Name == "NeoClinic")
+                    {
+                        var locations = new[]
+                        {
+                            Path.Combine(currentDir.FullName, "NeoClinic.Api", credentialsPath),
+                            Path.Combine(currentDir.FullName, "NeoClinic.Api", "Keys", "ServiceAccountKey.json"),
+                            Path.Combine(currentDir.FullName, "NeoClinic.Application", "Common", "Keys", "ServiceAccountKey.json"),
+                            Path.Combine(currentDir.FullName, "NeoClinic.Application", "Common", "Keys", Path.GetFileName(credentialsPath))
+                        };
+
+                        foreach (var loc in locations)
+                        {
+                            if (File.Exists(loc))
+                            {
+                                foundPath = loc;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    currentDir = currentDir.Parent;
+                }
+
+                if (foundPath != null)
+                {
+                    resolvedPath = foundPath;
+                }
+                else
+                {
+                    resolvedPath = baseDirectoryPath; // Fallback to base directory
+                }
+            }
+        }
+
+        if (!File.Exists(resolvedPath))
+        {
+            throw new FileNotFoundException($"Firebase credentials file could not be found at: '{resolvedPath}'");
+        }
+
+        using var stream = File.OpenRead(resolvedPath);
+        var credential = CredentialFactory.FromStream<ServiceAccountCredential>(stream).ToGoogleCredential();
         _storageClient = StorageClient.Create(credential);
     }
 
