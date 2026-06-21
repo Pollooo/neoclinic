@@ -27,6 +27,12 @@ public class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
             .IsRequired()
             .HasConversion<string>();
 
+        builder.Property(x => x.ThumbnailUrl)
+            .HasMaxLength(1000);
+
+        builder.Property(x => x.ThumbnailBlobName)
+            .HasMaxLength(500);
+
         builder.Property(x => x.CreatedAt)
             .IsRequired();
     }

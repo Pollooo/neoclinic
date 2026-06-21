@@ -32,6 +32,8 @@ export class MediaManagementComponent implements OnInit {
   public previewUrl = signal<string | null>(null);
   public isDragging = signal(false);
   public selectedMediaForView = signal<GetMediaFilesResponse | null>(null);
+  public selectedThumbnail = signal<File | null>(null);
+  public thumbnailPreviewUrl = signal<string | null>(null);
 
   public mediaForm!: FormGroup;
 
@@ -69,6 +71,8 @@ export class MediaManagementComponent implements OnInit {
     this.mediaForm.reset({ type: MediaType.Image });
     this.selectedFile.set(null);
     this.previewUrl.set(null);
+    this.selectedThumbnail.set(null);
+    this.thumbnailPreviewUrl.set(null);
   }
 
   public openEditMode(media: GetMediaFilesResponse): void {
@@ -76,6 +80,8 @@ export class MediaManagementComponent implements OnInit {
     this.editingMedia.set(media);
     this.selectedFile.set(null);
     this.previewUrl.set(null);
+    this.selectedThumbnail.set(null);
+    this.thumbnailPreviewUrl.set(null);
     this.mediaForm.patchValue({
       fileDescriptionUz: media.fileDescriptionUz || '',
       fileDescriptionRu: media.fileDescriptionRu || '',
@@ -91,6 +97,8 @@ export class MediaManagementComponent implements OnInit {
     this.mediaForm.reset();
     this.selectedFile.set(null);
     this.previewUrl.set(null);
+    this.selectedThumbnail.set(null);
+    this.thumbnailPreviewUrl.set(null);
   }
 
   public onFileSelected(event: Event): void {
@@ -178,6 +186,32 @@ export class MediaManagementComponent implements OnInit {
     this.previewUrl.set(null);
   }
 
+  public onThumbnailSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        this.notificationService.showError(
+          this.translationService.currentLanguage() === 'uz'
+            ? 'Faqat rasm faylini tanlang'
+            : 'Выберите только изображение'
+        );
+        return;
+      }
+      this.selectedThumbnail.set(file);
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        this.thumbnailPreviewUrl.set(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  public removeSelectedThumbnail(): void {
+    this.selectedThumbnail.set(null);
+    this.thumbnailPreviewUrl.set(null);
+  }
+
   public isImage(): boolean {
     return this.selectedFile()?.type.startsWith('image/') || false;
   }
@@ -239,7 +273,8 @@ export class MediaManagementComponent implements OnInit {
         altTextUz: formValue.altTextUz || undefined,
         altTextRu: formValue.altTextRu || undefined,
         type: formValue.type,
-        file: this.selectedFile() || undefined
+        file: this.selectedFile() || undefined,
+        thumbnail: this.selectedThumbnail() || undefined
       };
 
       this.apiService.updateMediaFileRequest(request).subscribe({
@@ -268,7 +303,8 @@ export class MediaManagementComponent implements OnInit {
       altTextUz: formValue.altTextUz || undefined,
       altTextRu: formValue.altTextRu || undefined,
       type: formValue.type,
-      file: this.selectedFile()!
+      file: this.selectedFile()!,
+      thumbnail: this.selectedThumbnail() || undefined
     };
 
     this.apiService.uploadMediaFileRequest(request).subscribe({

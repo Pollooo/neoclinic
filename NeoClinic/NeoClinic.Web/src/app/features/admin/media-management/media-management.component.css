@@ -371,6 +371,39 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
 }
 
+.upload-area-sm {
+  padding: 1.5rem 1rem;
+}
+
+.upload-area-sm svg {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 0.5rem;
+}
+
+.current-thumbnail {
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.current-thumbnail img {
+  max-height: 120px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.thumb-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0;
+}
+
+.media-preview-image-sm {
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 @media (max-width: 768px) {
   .media-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

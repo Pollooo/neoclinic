@@ -121,6 +121,9 @@ import { HttpParams } from "@angular/common/http";
         }
         formData.append('Type', request.type.toString());
         formData.append('File', request.file, request.file.name);
+        if (request.thumbnail) {
+            formData.append('Thumbnail', request.thumbnail, request.thumbnail.name);
+        }
         
         return this.httpService.post<boolean>(routes.media_files.upload, formData);
     }
@@ -139,6 +142,10 @@ import { HttpParams } from "@angular/common/http";
 
         if (request.file) {
             formData.append('File', request.file, request.file.name);
+        }
+
+        if (request.thumbnail) {
+            formData.append('Thumbnail', request.thumbnail, request.thumbnail.name);
         }
 
         return this.httpService.put<boolean>(routes.media_files.update, formData);

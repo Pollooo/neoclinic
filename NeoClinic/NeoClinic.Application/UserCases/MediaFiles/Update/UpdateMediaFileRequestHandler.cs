@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NeoClinic.Application.Common.Interfaces;
+using NeoClinic.Domain.Enums;
 
 namespace NeoClinic.Application.UserCases.MediaFiles.Update;
 
@@ -38,6 +39,22 @@ public class UpdateMediaFileRequestHandler(
 
             if (!string.IsNullOrWhiteSpace(oldBlobName))
                 await storageService.DeleteFileAsync(oldBlobName);
+        }
+
+        if (request.Thumbnail is not null)
+        {
+            var oldThumbBlobName = mediaFile.ThumbnailBlobName;
+
+            var thumbBlobName = storageService.GenerateBlobName(
+                MediaType.Image,
+                $"{Guid.NewGuid():N}{Path.GetExtension(request.Thumbnail.FileName)}");
+            var thumbUrl = await storageService.UploadFileAsync(thumbBlobName, request.Thumbnail.OpenReadStream());
+
+            mediaFile.ThumbnailUrl = thumbUrl;
+            mediaFile.ThumbnailBlobName = thumbBlobName;
+
+            if (!string.IsNullOrWhiteSpace(oldThumbBlobName))
+                await storageService.DeleteFileAsync(oldThumbBlobName);
         }
 
         return await context.SaveChangesAsync(cancellationToken) > 0;

@@ -11,4 +11,5 @@ public record GetMediaFilesResponse(
     string? AltTextRu,
     string FileUrl,
     string? ContentType,
-    MediaType Type);
+    MediaType Type,
+    string? ThumbnailUrl);

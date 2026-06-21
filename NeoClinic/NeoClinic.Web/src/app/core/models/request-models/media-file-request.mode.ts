@@ -15,6 +15,7 @@ export interface UploadMediaFileRequest {
     altTextRu?: string;
     type: MediaType;
     file: File;
+    thumbnail?: File;
 }
 
 export interface UpdateMediaFileRequest {
@@ -25,4 +26,5 @@ export interface UpdateMediaFileRequest {
     altTextRu?: string;
     type?: MediaType;
     file?: File;
+    thumbnail?: File;
 }

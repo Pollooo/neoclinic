@@ -11,5 +11,6 @@ public record UpdateMediaFileRequest(
     string? AltTextUz,
     string? AltTextRu,
     MediaType? Type,
-    IFormFile? File)
+    IFormFile? File,
+    IFormFile? Thumbnail)
     : IRequest<bool>;

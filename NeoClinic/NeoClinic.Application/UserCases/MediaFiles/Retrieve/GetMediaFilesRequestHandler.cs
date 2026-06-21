@@ -20,7 +20,8 @@ public class GetMediaFilesRequestHandler(
                 f.AltTextRu,
                 f.FileUrl,
                 f.ContentType,
-                f.Type))
+                f.Type,
+                f.ThumbnailUrl))
             .ToListAsync(cancellationToken);
     }
 }

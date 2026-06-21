@@ -15,6 +15,10 @@ public class DeleteMediaFileRequestHandler(
             return false;
 
         await storageService.DeleteFileAsync(doc.BlobName);
+
+        if (!string.IsNullOrWhiteSpace(doc.ThumbnailBlobName))
+            await storageService.DeleteFileAsync(doc.ThumbnailBlobName);
+
         context.MediaFiles.Remove(doc);
         if (await context.SaveChangesAsync(cancellationToken) > 0)
             return true;

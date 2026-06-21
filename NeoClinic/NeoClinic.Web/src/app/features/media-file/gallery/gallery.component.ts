@@ -69,10 +69,23 @@ export class GalleryComponent implements OnInit {
 
   public openLightbox(media: GetMediaFilesResponse): void {
     this.selectedMedia.set(media);
+
+    if (media.type === MediaType.Video) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'video';
+      link.href = media.fileUrl;
+      link.id = 'video-preload';
+      document.head.appendChild(link);
+    }
   }
 
   public closeLightbox(): void {
     this.selectedMedia.set(null);
+    const preloadLink = document.getElementById('video-preload');
+    if (preloadLink) {
+      preloadLink.remove();
+    }
   }
 
   public getFileDescription(media: GetMediaFilesResponse): string {
@@ -80,4 +93,5 @@ export class GalleryComponent implements OnInit {
       ? (media.fileDescriptionUz || '') 
       : (media.fileDescriptionRu || '');
   }
+
 }

@@ -17,5 +17,7 @@ public class MediaFile
     public string? AltTextRu { get; set; }
     public bool IsDoctor { get; set; } = false;
     public MediaType Type { get; set; }
+    public string? ThumbnailUrl { get; set; }
+    public string? ThumbnailBlobName { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
