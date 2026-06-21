@@ -75,23 +75,6 @@ export class GalleryComponent implements OnInit {
     this.selectedMedia.set(null);
   }
 
-  public onVideoError(event: Event, media?: GetMediaFilesResponse): void {
-    const videoElement = event.target as HTMLVideoElement;
-    console.error('Video loading error:', {
-      error: videoElement.error,
-      src: videoElement.currentSrc,
-      readyState: videoElement.readyState,
-      networkState: videoElement.networkState,
-      media: media
-    });
-  }
-
-  public onVideoLoaded(event: Event): void {
-    const videoElement = event.target as HTMLVideoElement;
-    videoElement.setAttribute('data-loaded', 'true');
-    console.log('Video loaded successfully:', event);
-  }
-
   public getFileDescription(media: GetMediaFilesResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
       ? (media.fileDescriptionUz || '') 

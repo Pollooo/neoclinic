@@ -25,6 +25,7 @@ export class MediaManagementComponent implements OnInit {
   public media = signal<GetMediaFilesResponse[]>([]);
   public loading = signal(true);
   public isUploadMode = signal(false);
+  public editingMedia = signal<GetMediaFilesResponse | null>(null);
   public submitting = signal(false);
   public selectedFile = signal<File | null>(null);
   public activeFilter = signal<MediaType | 'all'>('all');
@@ -64,13 +65,29 @@ export class MediaManagementComponent implements OnInit {
 
   public openUploadMode(): void {
     this.isUploadMode.set(true);
+    this.editingMedia.set(null);
     this.mediaForm.reset({ type: MediaType.Image });
     this.selectedFile.set(null);
     this.previewUrl.set(null);
   }
 
+  public openEditMode(media: GetMediaFilesResponse): void {
+    this.isUploadMode.set(true);
+    this.editingMedia.set(media);
+    this.selectedFile.set(null);
+    this.previewUrl.set(null);
+    this.mediaForm.patchValue({
+      fileDescriptionUz: media.fileDescriptionUz || '',
+      fileDescriptionRu: media.fileDescriptionRu || '',
+      altTextUz: media.altTextUz || '',
+      altTextRu: media.altTextRu || '',
+      type: media.type
+    });
+  }
+
   public cancelUpload(): void {
     this.isUploadMode.set(false);
+    this.editingMedia.set(null);
     this.mediaForm.reset();
     this.selectedFile.set(null);
     this.previewUrl.set(null);
@@ -126,14 +143,15 @@ export class MediaManagementComponent implements OnInit {
       return;
     }
 
-    // Validate file size (max 50MB for videos, 10MB for images)
-    const maxSize = file.type.startsWith('video/') ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      const maxSizeMB = file.type.startsWith('video/') ? '50MB' : '10MB';
+      const message = file.type.startsWith('video/')
+        ? 'Video file size must not exceed 10 MB.'
+        : 'File size must not exceed 10 MB.';
       this.notificationService.showError(
         this.translationService.currentLanguage() === 'uz' 
-          ? `Fayl hajmi ${maxSizeMB} dan oshmasligi kerak` 
-          : `Размер файла не должен превышать ${maxSizeMB}`
+          ? 'Video fayl hajmi 10 MB dan oshmasligi kerak' 
+          : message
       );
       return;
     }
@@ -193,13 +211,15 @@ export class MediaManagementComponent implements OnInit {
     this.selectedMediaForView.set(null);
   }
 
-  public uploadMedia(): void {
+  public saveMedia(): void {
     if (this.mediaForm.invalid) {
       this.mediaForm.markAllAsTouched();
       return;
     }
 
-    if (!this.selectedFile()) {
+    const editingMedia = this.editingMedia();
+
+    if (!editingMedia && !this.selectedFile()) {
       this.notificationService.showWarning(
         this.translationService.currentLanguage() === 'uz' 
           ? 'Fayl tanlang' 
@@ -210,6 +230,37 @@ export class MediaManagementComponent implements OnInit {
 
     this.submitting.set(true);
     const formValue = this.mediaForm.value;
+
+    if (editingMedia) {
+      const request = {
+        id: editingMedia.id,
+        fileDescriptionUz: formValue.fileDescriptionUz || undefined,
+        fileDescriptionRu: formValue.fileDescriptionRu || undefined,
+        altTextUz: formValue.altTextUz || undefined,
+        altTextRu: formValue.altTextRu || undefined,
+        type: formValue.type,
+        file: this.selectedFile() || undefined
+      };
+
+      this.apiService.updateMediaFileRequest(request).subscribe({
+        next: () => {
+          this.notificationService.showSuccess(
+            this.translationService.currentLanguage() === 'uz' 
+              ? 'Media ma\'lumotlari yangilandi' 
+              : 'Данные медиа обновлены'
+          );
+          this.loadMedia();
+          this.cancelUpload();
+        },
+        error: (error) => {
+          this.notificationService.showError(error.message);
+        },
+        complete: () => {
+          this.submitting.set(false);
+        }
+      });
+      return;
+    }
 
     const request = {
       fileDescriptionUz: formValue.fileDescriptionUz || undefined,

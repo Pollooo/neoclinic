@@ -12,7 +12,7 @@ public class UpdateServiceRequestHandler(
         var service = await context.Services
             .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken);
 
-        if (service == null)
+        if (service is null)
             return false;
 
         service.NameUz = request.NameUz;
@@ -21,9 +21,6 @@ public class UpdateServiceRequestHandler(
         service.DescriptionRu = request.DescriptionRu;
         service.Price = request.Price;
 
-        if (await context.SaveChangesAsync(cancellationToken) > 0)
-            return true;
-
-        return false;
+        return await context.SaveChangesAsync(cancellationToken) > 0;
     }
 }

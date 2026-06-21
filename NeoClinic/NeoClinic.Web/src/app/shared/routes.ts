@@ -1,6 +1,7 @@
 export const routes = {
     appointments: {
         create: 'appointments/create',
+        delete: (appointmentId: string) => `appointments/delete/${appointmentId}`,
         get: 'appointments/get',
     },
     auth: {
@@ -20,6 +21,7 @@ export const routes = {
     },
     media_files: {
         upload: 'media-files/upload',
+        update: 'media-files/update',
         delete: (fileId: string) => `media-files/delete/${fileId}`,
         get: 'media-files/get',
     },

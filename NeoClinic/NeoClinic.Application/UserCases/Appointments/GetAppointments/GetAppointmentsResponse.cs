@@ -9,5 +9,5 @@ public record GetAppointmentsResponse(
     string? Email,
     string? Message,
     DateTime AppointmentDate,
-    GetServicesResponse GetServicesResponse,
+    GetServicesResponse? GetServicesResponse,
     DateTime CreatedAt);

@@ -64,10 +64,32 @@ export class AppointmentsManagementComponent implements OnInit {
     this.loadAppointments();
   }
 
+  public deleteAppointment(appointmentId: string): void {
+    if (!confirm(this.translationService.currentLanguage() === 'uz'
+      ? 'Qabulni o\'chirmoqchimisiz?'
+      : 'Delete this appointment?')) {
+      return;
+    }
+
+    this.apiService.deleteAppointmentRequest({ appointmentId }).subscribe({
+      next: () => {
+        this.notificationService.showSuccess(
+          this.translationService.currentLanguage() === 'uz'
+            ? 'Qabul o\'chirildi'
+            : 'Appointment deleted'
+        );
+        this.loadAppointments();
+      },
+      error: (error) => {
+        this.notificationService.showError(error.message);
+      }
+    });
+  }
+
   public formatDate(dateString?: string): string {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    
+
     if (this.translationService.currentLanguage() === 'uz') {
       const months = [
         'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
@@ -100,8 +122,12 @@ export class AppointmentsManagementComponent implements OnInit {
   }
 
   public getServiceName(service: any): string {
-    if (!service) return '-';
-    return this.translationService.currentLanguage() === 'uz' 
+    if (!service) {
+      return this.translationService.currentLanguage() === 'uz'
+        ? 'Xizmat o\'chirilgan'
+        : 'Услуга удалена';
+    }
+    return this.translationService.currentLanguage() === 'uz'
       ? (service.nameUz || '-')
       : (service.nameRu || '-');
   }

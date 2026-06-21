@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using NeoClinic.Application.UserCases.Appointments.CreateAppointment;
+using NeoClinic.Application.UserCases.Appointments.DeleteAppointment;
 using NeoClinic.Application.UserCases.Appointments.GetAppointments;
 
 namespace NeoClinic.Api.Endpoints;
@@ -19,6 +20,11 @@ public static class AppointmentEndpoints
         app.MapGet($"{GroupName}/get", GetAppointmentsAsync)
            .RequireAuthorization("AdminPolicy")
            .Produces<List<GetAppointmentsResponse>>(StatusCodes.Status200OK);
+
+        app.MapDelete($"{GroupName}/delete/{{appointmentId:guid}}", DeleteAppointmentAsync)
+           .RequireAuthorization("AdminPolicy")
+           .Produces<bool>(StatusCodes.Status200OK)
+           .Produces(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<IResult> CreateAppointmentAsync(
@@ -36,5 +42,13 @@ public static class AppointmentEndpoints
     {
         var result = await sender.Send(new GetAppointmentsRequest(startDate, endDate));
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> DeleteAppointmentAsync(
+        Guid appointmentId,
+        ISender sender)
+    {
+        var result = await sender.Send(new DeleteAppointmentRequest(appointmentId));
+        return result ? Results.Ok(true) : Results.BadRequest(false);
     }
 }

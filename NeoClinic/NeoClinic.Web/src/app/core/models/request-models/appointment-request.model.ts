@@ -12,3 +12,7 @@ export interface GetAppointmentsRequest {
     endDate?: string;
     serviceId?: string;
 }
+
+export interface DeleteAppointmentRequest {
+    appointmentId: string;
+}

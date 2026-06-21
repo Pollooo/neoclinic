@@ -117,39 +117,22 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background: #1a1a1a;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 }
 
-.video-thumbnail .media-video {
-  /* Ensure video thumbnail shows first frame */
-  min-height: 100%;
-  opacity: 0;
-  transition: opacity 0.5s ease;
+.video-static-thumb {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.video-thumbnail .media-video[data-loaded="true"] {
-  opacity: 1;
-}
-
-/* Show video once metadata (thumbnail) is loaded */
-.video-thumbnail video:not([data-loaded="false"]) {
-  opacity: 1;
-}
-
-.video-placeholder {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 5;
-}
-
-.video-icon-placeholder {
-  width: 120px;
-  height: 120px;
-  color: rgba(255, 255, 255, 0.3);
-  stroke-width: 0.5;
+.film-icon {
+  width: 80px;
+  height: 80px;
+  color: rgba(255, 255, 255, 0.18);
+  stroke-width: 0.75;
 }
 
 .play-button {

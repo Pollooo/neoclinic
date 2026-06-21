@@ -303,6 +303,10 @@
 .appointment-footer {
   padding-top: 1rem;
   border-top: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
 .appointment-footer small {
@@ -319,6 +323,22 @@
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.btn-delete {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.5rem 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-delete:hover {
+  background: #fecaca;
 }
 
 /* Responsive Design */
@@ -382,6 +402,11 @@
 
   .status-badge {
     align-self: flex-start;
+  }
+
+  .appointment-footer {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

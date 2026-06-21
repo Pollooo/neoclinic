@@ -89,62 +89,38 @@ export class ServicesManagementComponent implements OnInit {
     const formValue = this.serviceForm.value;
     const editingService = this.editingService();
 
-    if (editingService) {
-      const request = {
-        id: editingService.serviceId,
-        nameUz: formValue.nameUz,
-        descriptionUz: formValue.descriptionUz || undefined,
-        nameRu: formValue.nameRu,
-        descriptionRu: formValue.descriptionRu || undefined,
-        price: formValue.price ? Number(formValue.price) : undefined
-      };
+    const request = {
+      nameUz: formValue.nameUz,
+      descriptionUz: formValue.descriptionUz || undefined,
+      nameRu: formValue.nameRu,
+      descriptionRu: formValue.descriptionRu || undefined,
+      price: formValue.price ? Number(formValue.price) : undefined
+    };
 
-      this.apiService.updateServiceRequest(request).subscribe({
-        next: () => {
-          this.notificationService.showSuccess(
-            this.translationService.currentLanguage() === 'uz' 
-              ? 'Xizmat yangilandi' 
-              : 'Услуга обновлена'
-          );
-          this.loadServices();
-          this.cancelCreate();
-        },
-        error: (error) => {
-          this.notificationService.showError(error.message);
-          this.submitting.set(false);
-        },
-        complete: () => {
-          this.submitting.set(false);
-        }
-      });
-    } else {
-      const request = {
-        nameUz: formValue.nameUz,
-        descriptionUz: formValue.descriptionUz || undefined,
-        nameRu: formValue.nameRu,
-        descriptionRu: formValue.descriptionRu || undefined,
-        price: formValue.price ? Number(formValue.price) : undefined
-      };
+    const saveRequest = editingService
+      ? this.apiService.updateServiceRequest({
+          id: editingService.serviceId,
+          ...request
+        })
+      : this.apiService.createServiceRequest(request);
 
-      this.apiService.createServiceRequest(request).subscribe({
-        next: () => {
-          this.notificationService.showSuccess(
-            this.translationService.currentLanguage() === 'uz' 
-              ? 'Xizmat qo\'shildi' 
-              : 'Услуга добавлена'
-          );
-          this.loadServices();
-          this.cancelCreate();
-        },
-        error: (error) => {
-          this.notificationService.showError(error.message);
-          this.submitting.set(false);
-        },
-        complete: () => {
-          this.submitting.set(false);
-        }
-      });
-    }
+    saveRequest.subscribe({
+      next: () => {
+        this.notificationService.showSuccess(
+          this.translationService.currentLanguage() === 'uz' 
+            ? (editingService ? 'Xizmat yangilandi' : 'Xizmat qo\'shildi')
+            : (editingService ? 'Услуга обновлена' : 'Услуга добавлена')
+        );
+        this.loadServices();
+        this.cancelCreate();
+      },
+      error: (error) => {
+        this.notificationService.showError(error.message);
+      },
+      complete: () => {
+        this.submitting.set(false);
+      }
+    });
   }
 
   public deleteService(serviceId: string): void {

@@ -16,3 +16,13 @@ export interface UploadMediaFileRequest {
     type: MediaType;
     file: File;
 }
+
+export interface UpdateMediaFileRequest {
+    id: string;
+    fileDescriptionUz?: string;
+    fileDescriptionRu?: string;
+    altTextUz?: string;
+    altTextRu?: string;
+    type?: MediaType;
+    file?: File;
+}

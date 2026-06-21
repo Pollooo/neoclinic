@@ -51,10 +51,16 @@
 }
 
 .service-actions {
-  margin-top: auto;
   display: flex;
   gap: 0.5rem;
+  margin-top: auto;
   width: 100%;
+}
+
+.service-actions .btn-edit,
+.service-actions .btn-delete {
+  min-height: 38px;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {

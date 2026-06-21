@@ -77,7 +77,7 @@ public class TelegramBotReceiver(ITelegramBotClient bot, IServiceProvider servic
 
     private static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
-        Console.WriteLine(exception);
+        Console.WriteLine($"Warning: Telegram bot polling error: {exception.Message}");
         return Task.CompletedTask;
     }
 }

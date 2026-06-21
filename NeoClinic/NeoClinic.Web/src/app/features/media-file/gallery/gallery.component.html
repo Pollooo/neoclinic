@@ -1,123 +1,106 @@
 <div class="gallery-page">
   <div class="container">
     <h1 class="page-title">{{ translationService.t('common.gallery') }}</h1>
-    
+
     <!-- Filter Tabs -->
     <div class="filter-tabs">
-      <button 
-        class="tab" 
-        [class.active]="activeFilter() === 'all'"
-        (click)="setFilter('all')"
-      >
+      <button class="tab" [class.active]="activeFilter() === 'all'" (click)="setFilter('all')">
         {{ translationService.currentLanguage() === 'uz' ? 'Barchasi' : 'Все' }}
       </button>
-      <button 
-        class="tab" 
-        [class.active]="activeFilter() === MediaType.Image"
-        (click)="setFilter(MediaType.Image)"
-      >
+      <button class="tab" [class.active]="activeFilter() === MediaType.Image" (click)="setFilter(MediaType.Image)">
         {{ translationService.currentLanguage() === 'uz' ? 'Rasmlar' : 'Фото' }}
       </button>
-      <button 
-        class="tab" 
-        [class.active]="activeFilter() === MediaType.Video"
-        (click)="setFilter(MediaType.Video)"
-      >
+      <button class="tab" [class.active]="activeFilter() === MediaType.Video" (click)="setFilter(MediaType.Video)">
         {{ translationService.currentLanguage() === 'uz' ? 'Videolar' : 'Видео' }}
       </button>
     </div>
-    
+
     @if (loading()) {
-      <div class="gallery-grid" aria-hidden="true">
-        @for (_ of [1,2,3,4,5,6,7,8,9]; track $index) {
-          <div class="media-card-item skel-gallery-card">
-            <div class="sk skel-gallery-thumb"></div>
-          </div>
-        }
+    <div class="gallery-grid" aria-hidden="true">
+      @for (_ of [1,2,3,4,5,6,7,8,9]; track $index) {
+      <div class="media-card-item skel-gallery-card">
+        <div class="sk skel-gallery-thumb"></div>
       </div>
+      }
+    </div>
     } @else if (filteredMedia().length > 0) {
-      <div class="gallery-grid">
-        @for (media of filteredMedia(); track media.id) {
-          <div class="media-card-item">
-            <div class="media-item" (click)="openLightbox(media)">
-              @if (media.type === MediaType.Image) {
-                <img [src]="getMediaUrl(media.fileUrl)" [alt]="translationService.currentLanguage() === 'uz' ? media.altTextUz : media.altTextRu" class="media-image" />
-                <div class="media-overlay">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
-                  </svg>
-                </div>
-            } @else if (media.type === MediaType.Video) {
-              <div class="video-thumbnail">
-                <video 
-                  class="media-video" 
-                  preload="metadata"
-                  muted 
-                  playsinline
-                  loading="lazy"
-                  [attr.data-loaded]="false"
-                  (error)="onVideoError($event, media)"
-                  (loadedmetadata)="onVideoLoaded($event)">
-                  <source [src]="getMediaUrl(media.fileUrl) + '#t=0.1'" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-                <div class="video-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="video-icon-placeholder">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0118 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 016 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M19.125 12h1.5m0 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h1.5m14.25 0h1.5" />
-                  </svg>
-                </div>
-                <div class="play-button">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                </div>
-              </div>
-            }
-            </div>
-            @if (getFileDescription(media)) {
-              <div class="media-description-card">
-                <p>{{ getFileDescription(media) }}</p>
-              </div>
-            }
+    <div class="gallery-grid">
+      @for (media of filteredMedia(); track media.id) {
+      <div class="media-card-item">
+        <div class="media-item" (click)="openLightbox(media)">
+          @if (media.type === MediaType.Image) {
+          <img [src]="getMediaUrl(media.fileUrl)"
+            [alt]="translationService.currentLanguage() === 'uz' ? media.altTextUz : media.altTextRu"
+            class="media-image" />
+          <div class="media-overlay">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
+            </svg>
           </div>
+          } @else if (media.type === MediaType.Video) {
+          <div class="video-thumbnail">
+            <div class="video-static-thumb">
+              <svg class="film-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <div class="play-button">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+          }
+        </div>
+        @if (getFileDescription(media)) {
+        <div class="media-description-card">
+          <p>{{ getFileDescription(media) }}</p>
+        </div>
         }
       </div>
+      }
+    </div>
     } @else {
-      <div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-        </svg>
-        <p>{{ translationService.t('common.noData') }}</p>
-      </div>
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+      </svg>
+      <p>{{ translationService.t('common.noData') }}</p>
+    </div>
     }
   </div>
-  
+
   <!-- Lightbox -->
   @if (selectedMedia()) {
-    <div class="lightbox" (click)="closeLightbox()">
-      <button class="lightbox-close">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <div class="lightbox-content" (click)="$event.stopPropagation()">
-        <div class="lightbox-media">
-          @if (selectedMedia()!.type === MediaType.Image) {
-            <img [src]="getMediaUrl(selectedMedia()!.fileUrl)" [alt]="translationService.currentLanguage() === 'uz' ? selectedMedia()!.altTextUz : selectedMedia()!.altTextRu" />
+  <div class="lightbox" (click)="closeLightbox()">
+    <button class="lightbox-close">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <div class="lightbox-media">
+        @if (selectedMedia()!.type === MediaType.Image) {
+        <img [src]="getMediaUrl(selectedMedia()!.fileUrl)"
+          [alt]="translationService.currentLanguage() === 'uz' ? selectedMedia()!.altTextUz : selectedMedia()!.altTextRu" />
         } @else if (selectedMedia()!.type === MediaType.Video) {
-          <video controls autoplay playsinline preload="auto">
-            <source [src]="getMediaUrl(selectedMedia()!.fileUrl)" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        }
-        </div>
-        @if (getFileDescription(selectedMedia()!)) {
-          <div class="lightbox-description">
-            <p>{{ getFileDescription(selectedMedia()!) }}</p>
-          </div>
+        <video #lightboxVideo controls autoplay playsinline preload="auto" (click)="$event.stopPropagation()">
+          <source [src]="getMediaUrl(selectedMedia()!.fileUrl)" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         }
       </div>
+      @if (getFileDescription(selectedMedia()!)) {
+      <div class="lightbox-description">
+        <p>{{ getFileDescription(selectedMedia()!) }}</p>
+      </div>
+      }
     </div>
+  </div>
   }
 </div>
-

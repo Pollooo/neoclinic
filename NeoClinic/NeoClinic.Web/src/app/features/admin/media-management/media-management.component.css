@@ -142,32 +142,25 @@
   font-weight: 400;
 }
 
-.btn-delete {
-  margin: 0 1rem 1rem;
-  padding: 0.5rem 1rem;
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+.media-actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
+  margin: 0 1rem 1rem;
   position: relative;
   z-index: 10;
 }
 
-.btn-delete:hover {
-  background: #dc2626;
+.media-actions .btn-edit,
+.media-actions .btn-delete {
+  min-height: 38px;
+  margin: 0;
+  white-space: nowrap;
 }
 
-.btn-delete svg {
-  width: 16px;
-  height: 16px;
+.media-actions .btn-edit svg,
+.media-actions .btn-delete svg {
+  width: 15px;
+  height: 15px;
 }
 
 /* Upload Area Styles */

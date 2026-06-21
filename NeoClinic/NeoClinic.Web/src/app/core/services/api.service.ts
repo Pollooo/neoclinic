@@ -4,13 +4,13 @@ import { LogInRequest } from "../models/request-models/log-in-request.model";
 import { LogInResponse } from "../models/response-models/log-in-response.model";
 import { Observable } from "rxjs";
 import { routes } from "../../shared/routes";
-import { CreateAppointmentRequest, GetAppointmentsRequest } from "../models/request-models/appointment-request.model";
+import { CreateAppointmentRequest, DeleteAppointmentRequest, GetAppointmentsRequest } from "../models/request-models/appointment-request.model";
 import { GetAppointmentResponse } from "../models/response-models/appointment-response.model";
 import { CreateContactMessageRequest, GetContactMessageRequest, UpdateContactMessageRequest } from "../models/request-models/contact-message-request.model";
 import { GetContactMessageResponse } from "../models/response-models/contact-message-response.model";
 import { CreateDoctorRequest, DeleteDoctorRequest, GetDoctorsRequest, UpdateDoctorPhotoRequest, UpdateDoctorRequest } from "../models/request-models/doctor-request.mode";
 import { GetDoctorsResponse } from "../models/response-models/doctor-response.model";
-import { DeleteMediaFileRequest, GetMediaFilesRequest, UploadMediaFileRequest } from "../models/request-models/media-file-request.mode";
+import { DeleteMediaFileRequest, GetMediaFilesRequest, UpdateMediaFileRequest, UploadMediaFileRequest } from "../models/request-models/media-file-request.mode";
 import { CreateServiceRequest, DeleteServiceRequest, GetServicesRequest, UpdateServiceRequest } from "../models/request-models/service-request.modet";
 import { GetServicesResponse } from "../models/response-models/service-response.model";
 import { GetMediaFilesResponse } from "../models/response-models/media-file-response.model";
@@ -42,6 +42,10 @@ import { HttpParams } from "@angular/common/http";
             params = params.set('serviceId', request.serviceId);
         }
         return this.httpService.get<GetAppointmentResponse[]>(routes.appointments.get, { params });
+    }
+
+    public deleteAppointmentRequest(request: DeleteAppointmentRequest): Observable<boolean> {
+        return this.httpService.delete<boolean>(routes.appointments.delete(request.appointmentId));
     }
 
     public createContactMessageRequest(request: CreateContactMessageRequest): Observable<boolean> {
@@ -119,6 +123,25 @@ import { HttpParams } from "@angular/common/http";
         formData.append('File', request.file, request.file.name);
         
         return this.httpService.post<boolean>(routes.media_files.upload, formData);
+    }
+
+    public updateMediaFileRequest(request: UpdateMediaFileRequest): Observable<boolean> {
+        const formData = new FormData();
+        formData.append('Id', request.id);
+        formData.append('FileDescriptionUz', request.fileDescriptionUz ?? '');
+        formData.append('FileDescriptionRu', request.fileDescriptionRu ?? '');
+        formData.append('AltTextUz', request.altTextUz ?? '');
+        formData.append('AltTextRu', request.altTextRu ?? '');
+
+        if (request.type !== undefined) {
+            formData.append('Type', request.type.toString());
+        }
+
+        if (request.file) {
+            formData.append('File', request.file, request.file.name);
+        }
+
+        return this.httpService.put<boolean>(routes.media_files.update, formData);
     }
 
     public deleteMediaFileRequest(request: DeleteMediaFileRequest): Observable<boolean> {

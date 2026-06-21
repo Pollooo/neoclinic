@@ -8,8 +8,8 @@ public class Appointment
     public string PhoneNumber { get; set; } = null!;
     public string? Email { get; set; }
 
-    public Guid ServiceId { get; set; }
-    public Service Service { get; set; } = null!;
+    public Guid? ServiceId { get; set; }
+    public Service? Service { get; set; }
 
     public DateTime AppointmentDate { get; set; }
 

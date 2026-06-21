@@ -68,11 +68,20 @@
               <p class="media-description">{{ getFileDescription(mediaItem) }}</p>
             }
           </div>
-          <button class="btn-delete" (click)="$event.stopPropagation(); deleteMedia(mediaItem.id)">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-            </svg>
-          </button>
+          <div class="media-actions">
+            <button class="btn-edit" (click)="$event.stopPropagation(); openEditMode(mediaItem)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+              </svg>
+              {{ translationService.t('common.edit') }}
+            </button>
+            <button class="btn-delete" (click)="$event.stopPropagation(); deleteMedia(mediaItem.id)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              </svg>
+              {{ translationService.t('common.delete') }}
+            </button>
+          </div>
         </div>
       }
     </div>
@@ -90,7 +99,13 @@
     <div class="modal-overlay" (click)="cancelUpload()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>{{ translationService.currentLanguage() === 'uz' ? 'Media yuklash' : 'Загрузить медиа' }}</h2>
+          <h2>
+            @if (editingMedia()) {
+              {{ translationService.currentLanguage() === 'uz' ? 'Media ma\'lumotlarini tahrirlash' : 'Редактировать данные медиа' }}
+            } @else {
+              {{ translationService.currentLanguage() === 'uz' ? 'Media yuklash' : 'Загрузить медиа' }}
+            }
+          </h2>
           <button class="modal-close" (click)="cancelUpload()">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -98,67 +113,69 @@
           </button>
         </div>
 
-        <form [formGroup]="mediaForm" (ngSubmit)="uploadMedia()" class="modal-form">
-          <div class="form-group">
-            <label>{{ translationService.currentLanguage() === 'uz' ? 'Fayl' : 'Файл' }}</label>
+        <form [formGroup]="mediaForm" (ngSubmit)="saveMedia()" class="modal-form">
+          @if (!editingMedia()) {
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'Fayl' : 'Файл' }}</label>
             
-            @if (!previewUrl()) {
-              <div 
-                class="upload-area"
-                [class.dragging]="isDragging()"
-                (dragover)="onDragOver($event)"
-                (dragleave)="onDragLeave($event)"
-                (drop)="onDrop($event)"
-                (click)="fileInput.click()">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                </svg>
-                <p class="upload-text">
-                  {{ translationService.currentLanguage() === 'uz' ? 'Faylni bosing yoki bu yerga torting' : 'Нажмите или перетащите файл сюда' }}
-                </p>
-                <p class="upload-hint">
-                  {{ translationService.currentLanguage() === 'uz' ? 'Rasmlar (max 10MB) yoki Videolar (max 50MB)' : 'Изображения (макс 10MB) или Видео (макс 50MB)' }}
-                </p>
-              </div>
-              <input 
-                #fileInput
-                type="file" 
-                accept="image/*,video/*" 
-                (change)="onFileSelected($event)" 
-                class="input-file-hidden" />
-            } @else {
-              <div class="file-preview-container">
-                @if (isImage()) {
-                  <img [src]="previewUrl()" alt="Preview" class="media-preview-image" />
-                } @else if (isVideo()) {
-                  <video class="media-preview-video" controls>
-                    <source [src]="previewUrl()" [type]="selectedFile()!.type" />
-                    Your browser does not support the video tag.
-                  </video>
-                }
-                
-                <button type="button" class="btn-remove-file" (click)="removeSelectedFile()">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              @if (!previewUrl()) {
+                <div 
+                  class="upload-area"
+                  [class.dragging]="isDragging()"
+                  (dragover)="onDragOver($event)"
+                  (dragleave)="onDragLeave($event)"
+                  (drop)="onDrop($event)"
+                  (click)="fileInput.click()">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                   </svg>
-                  {{ translationService.currentLanguage() === 'uz' ? 'O\'chirish' : 'Удалить' }}
-                </button>
-                
-                <div class="file-info-preview">
-                  <span class="file-name-text">{{ selectedFile()!.name }}</span>
-                  <span class="file-size-text">{{ (selectedFile()!.size / 1024 / 1024).toFixed(2) }} MB</span>
+                  <p class="upload-text">
+                    {{ translationService.currentLanguage() === 'uz' ? 'Faylni bosing yoki bu yerga torting' : 'Нажмите или перетащите файл сюда' }}
+                  </p>
+                  <p class="upload-hint">
+                    {{ translationService.currentLanguage() === 'uz' ? 'Rasmlar va Videolar (max 10MB)' : 'Изображения и Видео (макс 10MB)' }}
+                  </p>
                 </div>
-              </div>
-            }
-          </div>
+                <input 
+                  #fileInput
+                  type="file" 
+                  accept="image/*,video/*" 
+                  (change)="onFileSelected($event)" 
+                  class="input-file-hidden" />
+              } @else {
+                <div class="file-preview-container">
+                  @if (isImage()) {
+                    <img [src]="previewUrl()" alt="Preview" class="media-preview-image" />
+                  } @else if (isVideo()) {
+                    <video class="media-preview-video" controls>
+                      <source [src]="previewUrl()" [type]="selectedFile()!.type" />
+                      Your browser does not support the video tag.
+                    </video>
+                  }
+                  
+                  <button type="button" class="btn-remove-file" (click)="removeSelectedFile()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    {{ translationService.currentLanguage() === 'uz' ? 'O\'chirish' : 'Удалить' }}
+                  </button>
+                  
+                  <div class="file-info-preview">
+                    <span class="file-name-text">{{ selectedFile()!.name }}</span>
+                    <span class="file-size-text">{{ (selectedFile()!.size / 1024 / 1024).toFixed(2) }} MB</span>
+                  </div>
+                </div>
+              }
+            </div>
 
-          <div class="form-group">
-            <label>{{ translationService.currentLanguage() === 'uz' ? 'Turi' : 'Тип' }}</label>
-            <select formControlName="type" class="input">
-              <option [value]="MediaType.Image">{{ translationService.currentLanguage() === 'uz' ? 'Rasm' : 'Изображение' }}</option>
-              <option [value]="MediaType.Video">{{ translationService.currentLanguage() === 'uz' ? 'Video' : 'Видео' }}</option>
-            </select>
-          </div>
+            <div class="form-group">
+              <label>{{ translationService.currentLanguage() === 'uz' ? 'Turi' : 'Тип' }}</label>
+              <select formControlName="type" class="input">
+                <option [value]="MediaType.Image">{{ translationService.currentLanguage() === 'uz' ? 'Rasm' : 'Изображение' }}</option>
+                <option [value]="MediaType.Video">{{ translationService.currentLanguage() === 'uz' ? 'Video' : 'Видео' }}</option>
+              </select>
+            </div>
+          }
 
           <div class="form-section">
             <h3>O'zbekcha / Uzbek</h3>
@@ -191,7 +208,7 @@
               {{ translationService.t('common.cancel') }}
             </button>
             <button type="submit" class="btn btn-primary" [disabled]="mediaForm.invalid || submitting()">
-              {{ submitting() ? translationService.t('common.loading') : translationService.currentLanguage() === 'uz' ? 'Yuklash' : 'Загрузить' }}
+              {{ submitting() ? translationService.t('common.loading') : editingMedia() ? translationService.t('common.save') : translationService.currentLanguage() === 'uz' ? 'Yuklash' : 'Загрузить' }}
             </button>
           </div>
         </form>

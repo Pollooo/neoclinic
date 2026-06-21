@@ -28,7 +28,7 @@ public class GetAppointmentsRequestHandler(
                 a.Email,
                 a.Message,
                 a.AppointmentDate,
-                new GetServicesResponse(
+                a.Service == null ? null : new GetServicesResponse(
                     a.Service.Id,
                     a.Service.NameUz,
                     a.Service.DescriptionUz,
