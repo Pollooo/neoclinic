@@ -64,7 +64,8 @@ export class AppointmentsManagementComponent implements OnInit {
     this.loadAppointments();
   }
 
-  public deleteAppointment(appointmentId: string): void {
+  public deleteAppointment(appointmentId: string | undefined): void {
+    if (!appointmentId) return;
     if (!confirm(this.translationService.currentLanguage() === 'uz'
       ? 'Qabulni o\'chirmoqchimisiz?'
       : 'Delete this appointment?')) {
