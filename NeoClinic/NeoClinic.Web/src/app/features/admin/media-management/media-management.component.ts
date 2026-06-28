@@ -7,6 +7,7 @@ import { NotificationService } from '../../../core/services/notification.service
 import { GetMediaFilesResponse } from '../../../core/models/response-models/media-file-response.model';
 import { MediaType } from '../../../core/models/enums/media-type';
 import { environment } from '../../../environments/environment';
+import { routes } from '../../../shared/routes';
 
 @Component({
   selector: 'app-media-management',
@@ -367,8 +368,10 @@ export class MediaManagementComponent implements OnInit {
     return this.media().filter(m => m.type === MediaType.Video).length;
   }
 
-  public getMediaUrl(fileUrl: string): string {
-    // fileUrl is already a complete Azure Blob Storage URL
+  public getMediaUrl(fileUrl: string, blobName?: string): string {
+    if (blobName) {
+      return `${environment.apiBaseUrl}/${routes.media_files.proxy(blobName)}`;
+    }
     return fileUrl;
   }
 

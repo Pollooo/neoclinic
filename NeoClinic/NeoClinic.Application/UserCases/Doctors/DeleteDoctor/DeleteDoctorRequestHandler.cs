@@ -14,18 +14,20 @@ public class DeleteDoctorRequestHandler(
         if (doctor is null)
             return false;
 
-        context.Doctors.Remove(doctor);
-        if (!await storageService.DeleteFileAsync(doctor.BlobName))
-            return false;
+        try
+        {
+            await storageService.DeleteFileAsync(doctor.BlobName);
+        }
+        catch
+        {
+            // Photo might be in an old/unavailable storage provider — skip
+        }
 
         var file = await context.MediaFiles.FirstOrDefaultAsync(f => f.FileUrl == doctor.PhotoUrl, cancellationToken);
-        if (file is null)
-            return false;
+        if (file is not null)
+            context.MediaFiles.Remove(file);
 
-        context.MediaFiles.Remove(file);
-        if (await context.SaveChangesAsync(cancellationToken) > 1)
-            return true;
-
-        return false;
+        context.Doctors.Remove(doctor);
+        return await context.SaveChangesAsync(cancellationToken) > 0;
     }
 }

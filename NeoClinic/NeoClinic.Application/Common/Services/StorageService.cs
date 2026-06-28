@@ -39,6 +39,13 @@ public class StorageService : IStorageService
         return Task.FromResult(blobClient.Uri.ToString());
     }
 
+    public async Task<(byte[] Content, string ContentType)> GetFileBytesAsync(string blobName)
+    {
+        var blobClient = Container.GetBlobClient(blobName);
+        var response = await blobClient.DownloadContentAsync();
+        return (response.Value.Content.ToArray(), response.Value.Details.ContentType);
+    }
+
     public string GenerateBlobName(MediaType mediaType, string fileName)
     {
         var extension = Path.GetExtension(fileName);

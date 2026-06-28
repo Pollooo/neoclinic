@@ -21,7 +21,9 @@ public class GetMediaFilesRequestHandler(
                 f.FileUrl,
                 f.ContentType,
                 f.Type,
-                f.ThumbnailUrl))
+                f.ThumbnailUrl,
+                f.BlobName,
+                f.ThumbnailBlobName))
             .ToListAsync(cancellationToken);
     }
 }

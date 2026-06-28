@@ -404,6 +404,23 @@
   border-radius: 8px;
 }
 
+.video-thumb-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.video-thumb-wrapper .video-icon {
+  z-index: 2;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0 0 0.5rem;
+  font-style: italic;
+}
+
 @media (max-width: 768px) {
   .media-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

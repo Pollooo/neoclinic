@@ -24,6 +24,7 @@ export const routes = {
         update: 'media-files/update',
         delete: (fileId: string) => `media-files/delete/${fileId}`,
         get: 'media-files/get',
+        proxy: (blobName: string) => `media-files/proxy/${blobName}`,
     },
     services: {
         create: 'services/create',

@@ -1,12 +1,8 @@
-using System;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using NeoClinic.Application.Common.Interfaces;
 using NeoClinic.Domain.Enums;
+using System.Net;
+using System.Net.Http.Headers;
 
 namespace NeoClinic.Application.Common.Services;
 
@@ -26,7 +22,6 @@ public class AppwriteStorageService : IStorageService
         _apiKey = configuration["Appwrite:ApiKey"] ?? throw new ArgumentNullException("Appwrite:ApiKey configuration is missing");
         _bucketId = configuration["Appwrite:BucketId"] ?? throw new ArgumentNullException("Appwrite:BucketId configuration is missing");
 
-        // Clean up endpoint trailing slash if any
         if (_endpoint.EndsWith("/"))
         {
             _endpoint = _endpoint.Substring(0, _endpoint.Length - 1);
@@ -48,7 +43,6 @@ public class AppwriteStorageService : IStorageService
             var fileId = GetFileId(blobName);
             var fileName = Path.GetFileName(blobName);
 
-            // Read the stream into a byte array first to avoid stale stream issues
             byte[] fileBytes;
             if (content.CanSeek)
             {
@@ -62,7 +56,6 @@ public class AppwriteStorageService : IStorageService
 
             var requestUri = $"{_endpoint}/storage/buckets/{_bucketId}/files";
 
-            // Create a fresh HttpClient per request via factory to avoid stale connections
             var httpClient = _httpClientFactory.CreateClient("Appwrite");
 
             using var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
@@ -145,6 +138,25 @@ public class AppwriteStorageService : IStorageService
         {
             throw new Exception($"Error generating public URL: {ex.Message}", ex);
         }
+    }
+
+    public async Task<(byte[] Content, string ContentType)> GetFileBytesAsync(string blobName)
+    {
+        var fileId = GetFileId(blobName);
+        var requestUri = $"{_endpoint}/storage/buckets/{_bucketId}/files/{fileId}/view?project={_projectId}";
+
+        var httpClient = _httpClientFactory.CreateClient("Appwrite");
+        using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+        request.Headers.Add("X-Appwrite-Project", _projectId);
+        request.Headers.Add("X-Appwrite-Key", _apiKey);
+
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+
+        return (bytes, contentType);
     }
 
     private string GetFileId(string blobName)

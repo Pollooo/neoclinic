@@ -141,6 +141,21 @@ public class FirebaseStorageService : IStorageService
         }
     }
 
+    public async Task<(byte[] Content, string ContentType)> GetFileBytesAsync(string blobName)
+    {
+        try
+        {
+            using var memoryStream = new MemoryStream();
+            var obj = await _storageClient.DownloadObjectAsync(_bucketName, blobName, memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            return (memoryStream.ToArray(), obj.ContentType);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error downloading file from Firebase Storage: {ex.Message}", ex);
+        }
+    }
+
     public string GenerateBlobName(MediaType mediaType, string fileName)
     {
         var extension = Path.GetExtension(fileName);

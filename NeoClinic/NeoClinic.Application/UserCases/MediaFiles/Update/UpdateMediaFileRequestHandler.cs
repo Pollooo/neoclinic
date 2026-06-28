@@ -38,7 +38,16 @@ public class UpdateMediaFileRequestHandler(
             mediaFile.Type = type;
 
             if (!string.IsNullOrWhiteSpace(oldBlobName))
-                await storageService.DeleteFileAsync(oldBlobName);
+            {
+                try
+                {
+                    await storageService.DeleteFileAsync(oldBlobName);
+                }
+                catch
+                {
+                    // Old file might be in a different storage provider or unavailable — skip
+                }
+            }
         }
 
         if (request.Thumbnail is not null)
@@ -54,7 +63,16 @@ public class UpdateMediaFileRequestHandler(
             mediaFile.ThumbnailBlobName = thumbBlobName;
 
             if (!string.IsNullOrWhiteSpace(oldThumbBlobName))
-                await storageService.DeleteFileAsync(oldThumbBlobName);
+            {
+                try
+                {
+                    await storageService.DeleteFileAsync(oldThumbBlobName);
+                }
+                catch
+                {
+                    // Old thumbnail might be in a different storage provider or unavailable — skip
+                }
+            }
         }
 
         return await context.SaveChangesAsync(cancellationToken) > 0;

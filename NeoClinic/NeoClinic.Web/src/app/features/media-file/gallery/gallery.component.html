@@ -1,19 +1,35 @@
 <div class="gallery-page">
   <div class="container">
-    <h1 class="page-title">{{ translationService.t('common.gallery') }}</h1>
-
-    <!-- Filter Tabs -->
-    <div class="filter-tabs">
-      <button class="tab" [class.active]="activeFilter() === 'all'" (click)="setFilter('all')">
-        {{ translationService.currentLanguage() === 'uz' ? 'Barchasi' : 'Все' }}
-      </button>
-      <button class="tab" [class.active]="activeFilter() === MediaType.Image" (click)="setFilter(MediaType.Image)">
-        {{ translationService.currentLanguage() === 'uz' ? 'Rasmlar' : 'Фото' }}
-      </button>
-      <button class="tab" [class.active]="activeFilter() === MediaType.Video" (click)="setFilter(MediaType.Video)">
-        {{ translationService.currentLanguage() === 'uz' ? 'Videolar' : 'Видео' }}
+    <div class="gallery-header">
+      <h1 class="page-title">{{ translationService.t('common.gallery') }}</h1>
+      <button class="btn-filter" (click)="toggleFilters()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+        </svg>
+        <span>
+          {{ translationService.currentLanguage() === 'uz' ? 'Filtrlash' : 'Фильтр' }}
+          @if (activeFilter() !== 'all') {
+            : {{ activeFilter() === MediaType.Image 
+                ? (translationService.currentLanguage() === 'uz' ? 'Rasmlar' : 'Фото')
+                : (translationService.currentLanguage() === 'uz' ? 'Videolar' : 'Видео') }}
+          }
+        </span>
       </button>
     </div>
+
+    @if (showFilters()) {
+      <div class="filter-dropdown">
+          <button class="tab" [class.active]="activeFilter() === 'all'" (click)="selectFilter('all')">
+            {{ translationService.currentLanguage() === 'uz' ? 'Barchasi' : 'Все' }} ({{ media().length }})
+          </button>
+          <button class="tab" [class.active]="activeFilter() === MediaType.Image" (click)="selectFilter(MediaType.Image)">
+            {{ translationService.currentLanguage() === 'uz' ? 'Rasmlar' : 'Фото' }} ({{ getImageCount() }})
+          </button>
+          <button class="tab" [class.active]="activeFilter() === MediaType.Video" (click)="selectFilter(MediaType.Video)">
+            {{ translationService.currentLanguage() === 'uz' ? 'Videolar' : 'Видео' }} ({{ getVideoCount() }})
+          </button>
+        </div>
+      }
 
     @if (loading()) {
     <div class="gallery-grid" aria-hidden="true">
@@ -29,7 +45,7 @@
       <div class="media-card-item">
         <div class="media-item" (click)="openLightbox(media)">
           @if (media.type === MediaType.Image) {
-          <img [src]="getMediaUrl(media.fileUrl)"
+          <img [src]="getMediaUrl(media.fileUrl, media.blobName)"
             [alt]="translationService.currentLanguage() === 'uz' ? media.altTextUz : media.altTextRu"
             class="media-image" />
           <div class="media-overlay">
@@ -42,7 +58,7 @@
           } @else if (media.type === MediaType.Video) {
           <div class="video-thumbnail">
             @if (media.thumbnailUrl) {
-            <img [src]="getMediaUrl(media.thumbnailUrl)"
+            <img [src]="getMediaUrl(media.thumbnailUrl, media.thumbnailBlobName)"
               [alt]="translationService.currentLanguage() === 'uz' ? media.altTextUz : media.altTextRu"
               class="video-thumb-img" loading="lazy" />
             } @else {
@@ -92,11 +108,11 @@
     <div class="lightbox-content" (click)="$event.stopPropagation()">
       <div class="lightbox-media">
         @if (selectedMedia()!.type === MediaType.Image) {
-        <img [src]="getMediaUrl(selectedMedia()!.fileUrl)"
+        <img [src]="getMediaUrl(selectedMedia()!.fileUrl, selectedMedia()!.blobName)"
           [alt]="translationService.currentLanguage() === 'uz' ? selectedMedia()!.altTextUz : selectedMedia()!.altTextRu" />
         } @else if (selectedMedia()!.type === MediaType.Video) {
         <video #lightboxVideo controls autoplay playsinline preload="auto" (click)="$event.stopPropagation()">
-          <source [src]="getMediaUrl(selectedMedia()!.fileUrl)" type="video/mp4" />
+          <source [src]="getMediaUrl(selectedMedia()!.fileUrl, selectedMedia()!.blobName)" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         }

@@ -60,7 +60,16 @@ public class UpdateDoctorPhotoRequestHandler(
         await context.SaveChangesAsync(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(oldBlobName))
-            await storageService.DeleteFileAsync(oldBlobName);
+        {
+            try
+            {
+                await storageService.DeleteFileAsync(oldBlobName);
+            }
+            catch
+            {
+                // Old photo might be in a different storage provider — skip
+            }
+        }
 
         return true;
     }

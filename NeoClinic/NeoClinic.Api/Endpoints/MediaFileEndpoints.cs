@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NeoClinic.Application.Common.Interfaces;
 using NeoClinic.Application.UserCases.MediaFiles.Delete;
 using NeoClinic.Application.UserCases.MediaFiles.Retrieve;
 using NeoClinic.Application.UserCases.MediaFiles.Update;
@@ -27,6 +28,7 @@ public static class MediaFileEndpoints
            .RequireAuthorization("AdminPolicy");
 
         app.MapGet($"{GroupName}/get", GetMediaFilesAsync);
+        app.MapGet($"{GroupName}/proxy/{{**blobName}}", ProxyMediaFileAsync);
     }
 
     private static async Task<IResult> UploadMediaFileAsync(
@@ -58,6 +60,24 @@ public static class MediaFileEndpoints
     {
         var result = await sender.Send(new GetMediaFilesRequest(fileId));
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> ProxyMediaFileAsync(
+        string blobName,
+        IStorageService storageService)
+    {
+        if (string.IsNullOrWhiteSpace(blobName))
+            return Results.BadRequest("Blob name is required");
+
+        try
+        {
+            var (content, contentType) = await storageService.GetFileBytesAsync(blobName);
+            return Results.File(content, contentType);
+        }
+        catch
+        {
+            return Results.NotFound();
+        }
     }
 
 }

@@ -14,15 +14,28 @@ public class DeleteMediaFileRequestHandler(
         if (doc is null)
             return false;
 
-        await storageService.DeleteFileAsync(doc.BlobName);
+        try
+        {
+            await storageService.DeleteFileAsync(doc.BlobName);
+        }
+        catch
+        {
+            // File might be in an old/unavailable storage provider — skip
+        }
 
         if (!string.IsNullOrWhiteSpace(doc.ThumbnailBlobName))
-            await storageService.DeleteFileAsync(doc.ThumbnailBlobName);
+        {
+            try
+            {
+                await storageService.DeleteFileAsync(doc.ThumbnailBlobName);
+            }
+            catch
+            {
+                // Thumbnail might be in an old/unavailable storage provider — skip
+            }
+        }
 
         context.MediaFiles.Remove(doc);
-        if (await context.SaveChangesAsync(cancellationToken) > 0)
-            return true;
-
-        return false;
+        return await context.SaveChangesAsync(cancellationToken) > 0;
     }
 }

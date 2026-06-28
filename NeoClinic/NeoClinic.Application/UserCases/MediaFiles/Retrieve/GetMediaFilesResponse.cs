@@ -12,4 +12,6 @@ public record GetMediaFilesResponse(
     string FileUrl,
     string? ContentType,
     MediaType Type,
-    string? ThumbnailUrl);
+    string? ThumbnailUrl,
+    string BlobName,
+    string? ThumbnailBlobName);

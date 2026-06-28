@@ -8,4 +8,6 @@ export interface GetMediaFilesResponse {
     contentType?: string;
     type: number;
     thumbnailUrl?: string;
+    blobName: string;
+    thumbnailBlobName?: string;
 }

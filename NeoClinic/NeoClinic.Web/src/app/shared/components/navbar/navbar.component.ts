@@ -7,6 +7,8 @@ import { LocalStorageService } from '../../../core/services/local-storage.servic
 import { ApiService } from '../../../core/services/api.service';
 import { GetContactMessageResponse } from '../../../core/models/response-models/contact-message-response.model';
 import { GetMediaFilesResponse } from '../../../core/models/response-models/media-file-response.model';
+import { environment } from '../../../environments/environment';
+import { routes } from '../../../shared/routes';
 
 @Component({
   selector: 'app-navbar',
@@ -386,7 +388,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
         );
         if (logoMedia) {
           this.logoMedia.set(logoMedia);
-          this.logoUrl.set(logoMedia.fileUrl);
+          // Use proxy URL for videos, direct URL for images
+          if (logoMedia.type === 1 && logoMedia.blobName) {
+            this.logoUrl.set(`${environment.apiBaseUrl}/${routes.media_files.proxy(logoMedia.blobName)}`);
+          } else {
+            this.logoUrl.set(logoMedia.fileUrl);
+          }
           // Check if it's a video (type 1 is video)
           this.isVideoLogo.set(logoMedia.type === 1);
         }

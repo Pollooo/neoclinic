@@ -9,4 +9,5 @@ public interface IStorageService
     Task<string> UploadFileAsync(string blobName, Stream content);
     Task<bool> DeleteFileAsync(string blobName);
     Task<string> GetPublicUrl(string blobName);
+    Task<(byte[] Content, string ContentType)> GetFileBytesAsync(string blobName);
 }

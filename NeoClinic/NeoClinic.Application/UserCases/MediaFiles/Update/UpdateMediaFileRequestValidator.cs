@@ -15,11 +15,9 @@ public class UpdateMediaFileRequestValidator : AbstractValidator<UpdateMediaFile
             .NotEmpty().WithMessage("Media file ID is required.");
 
         RuleFor(x => x.FileDescriptionUz)
-            .NotEmpty().WithMessage("Fayl tavsifi majburiy.")
             .MaximumLength(1000).WithMessage("Fayl tavsifi 1000 ta belgidan oshmasligi kerak.");
 
         RuleFor(x => x.FileDescriptionRu)
-            .NotEmpty().WithMessage("Описание файла обязательно.")
             .MaximumLength(1000).WithMessage("Описание файла не должно превышать 1000 символов.");
 
         RuleFor(x => x.AltTextUz)
