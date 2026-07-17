@@ -7,4 +7,5 @@ export interface GetDoctorsResponse {
     specialtyRu?: string;
     bioRu?: string;
     photoUrl?: string;
+    blobName: string;
 }

@@ -12,6 +12,14 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Database");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            Console.WriteLine("⚠️ Connection string 'Database' is missing. Add it to appsettings.json or environment variables.");
+            Console.WriteLine("   Example (appsettings.json): \"ConnectionStrings\": { \"Database\": \"Server=...;Database=...;User Id=...;Password=...;\" }");
+            Console.WriteLine("   Example (env var): ConnectionStrings__Database=Server=...");
+        }
+
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
         services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
@@ -21,11 +29,27 @@ public static class DependencyInjection
 
     public static void ApplyMigrations(this IApplicationBuilder app)
     {
-        using IServiceScope scope = app.ApplicationServices.CreateScope();
+        try
+        {
+            using IServiceScope scope = app.ApplicationServices.CreateScope();
+            using ApplicationDbContext dbContext =
+                scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        using ApplicationDbContext dbContext =
-            scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        dbContext.Database.Migrate();
+            if (dbContext.Database.CanConnect())
+            {
+                dbContext.Database.Migrate();
+                Console.WriteLine("✅ Database migrations applied successfully");
+            }
+            else
+            {
+                Console.WriteLine("⚠️ Could not connect to database — migrations skipped");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ Database migration failed: {ex.Message}");
+            Console.WriteLine("The API will continue to run, but database features may be unavailable.");
+            Console.WriteLine("Run 'dotnet ef database update' manually after fixing connection issues.");
+        }
     }
 }

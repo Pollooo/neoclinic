@@ -8,4 +8,5 @@ public record GetDoctorsResponse(
     string FullNameRu,
     string? SpecialtyRu,
     string? BioRu,
-    string? PhotoUrl);
+    string? PhotoUrl,
+    string BlobName);

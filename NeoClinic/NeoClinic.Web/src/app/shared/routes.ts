@@ -32,4 +32,7 @@ export const routes = {
         delete: (serviceId: string) => `services/delete/${serviceId}`,
         get: 'services/get',
     },
+    error_logs: {
+        get: 'error-logs/get',
+    }
 }

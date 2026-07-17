@@ -56,15 +56,20 @@ public static class DependencyInjection
             .AddPolicy("AdminPolicy", policy =>
                 policy.RequireRole("Admin"));
 
-        services.AddHttpClient("Supabase", client =>
+        services.AddHttpClient("TelegramStorage", client =>
         {
             client.Timeout = TimeSpan.FromSeconds(90);
+        }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
+            SslProtocols = System.Security.Authentication.SslProtocols.Tls12
         });
 
         //services.AddScoped<IStorageService, StorageService>();
         //services.AddScoped<IStorageService, FirebaseStorageService>();
         //services.AddScoped<IStorageService, AppwriteStorageService>();
-        services.AddScoped<IStorageService, SupabaseStorageService>();
+        //services.AddScoped<IStorageService, SupabaseStorageService>();
+        services.AddScoped<IStorageService, TelegramStorageService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICommandHandler, CommandHandler>();
         services.AddScoped<ICallbackHandler, CallbackHandler>();

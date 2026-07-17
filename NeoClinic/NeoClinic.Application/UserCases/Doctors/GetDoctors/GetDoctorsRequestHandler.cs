@@ -20,7 +20,8 @@ public class GetDoctorsRequestHandler(
                 d.FullNameRu,
                 d.SpecialtyRu,
                 d.BioRu,
-                d.PhotoUrl))
+                d.PhotoUrl,
+                d.BlobName))
             .ToListAsync(cancellationToken);
     }
 }

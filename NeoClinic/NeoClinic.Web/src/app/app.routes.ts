@@ -81,6 +81,10 @@ export const routes: Routes = [
           {
             path: 'media',
             loadComponent: () => import('./features/admin/media-management/media-management.component').then(m => m.MediaManagementComponent)
+          },
+          {
+            path: 'error-logs',
+            loadComponent: () => import('./features/admin/error-logs-management/error-logs-management.component').then(m => m.ErrorLogsManagementComponent)
           }
         ]
       }
@@ -136,6 +140,10 @@ export const routes: Routes = [
           {
             path: 'media',
             loadComponent: () => import('./features/admin/media-management/media-management.component').then(m => m.MediaManagementComponent)
+          },
+          {
+            path: 'error-logs',
+            loadComponent: () => import('./features/admin/error-logs-management/error-logs-management.component').then(m => m.ErrorLogsManagementComponent)
           }
         ]
       }

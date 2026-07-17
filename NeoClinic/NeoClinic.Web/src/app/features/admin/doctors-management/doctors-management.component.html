@@ -16,7 +16,7 @@
       @for (doctor of doctors(); track doctor.doctorId) {
         <div class="doctor-card">
           @if (doctor.photoUrl) {
-            <img [src]="doctor.photoUrl" [alt]="getDoctorName(doctor)" class="doctor-photo" />
+            <img [src]="getDoctorPhotoUrl(doctor)" [alt]="getDoctorName(doctor)" class="doctor-photo" />
           } @else {
             <div class="doctor-photo-placeholder">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

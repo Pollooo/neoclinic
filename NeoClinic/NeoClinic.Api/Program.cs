@@ -1,5 +1,6 @@
 ﻿using NeoClinic.Api;
 using NeoClinic.Api.Endpoints;
+using NeoClinic.Api.Middleware;
 using NeoClinic.Application;
 using NeoClinic.Infrostructure;
 
@@ -30,6 +31,7 @@ app.UseSwaggerUI();
 app.UseHealthChecks("/health");
 app.UseResponseCompression();
 app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionLoggingMiddleware>();
 
 app.UseCors("AllowAngular");
 

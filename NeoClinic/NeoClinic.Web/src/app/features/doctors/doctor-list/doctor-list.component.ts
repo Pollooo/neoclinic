@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { TranslationService } from '../../../core/services/translation.service';
 import { ApiService } from '../../../core/services/api.service';
 import { GetDoctorsResponse } from '../../../core/models/response-models/doctor-response.model';
+import { environment } from '../../../environments/environment';
+import { routes } from '../../../shared/routes';
 
 @Component({
   selector: 'app-doctor-list',
@@ -51,5 +53,12 @@ export class DoctorListComponent implements OnInit {
     return this.translationService.currentLanguage() === 'uz' 
       ? (doctor.bioUz || '') 
       : (doctor.bioRu || '');
+  }
+
+  public getDoctorPhotoUrl(doctor: GetDoctorsResponse): string {
+    if (doctor.blobName) {
+      return `${environment.apiBaseUrl}/${routes.media_files.proxy(doctor.blobName)}`;
+    }
+    return doctor.photoUrl ?? '';
   }
 }

@@ -1,0 +1,118 @@
+<div class="error-logs-management">
+  <div class="header">
+    <h1 class="page-title">
+      {{ translationService.currentLanguage() === 'uz' ? 'Xatoliklar jurnali' : 'Журнал ошибок' }}
+    </h1>
+    <div class="header-info">
+      <span class="total-count">{{ translationService.currentLanguage() === 'uz' ? 'Jami' : 'Всего' }}: {{ totalCount() }}</span>
+      <button class="btn-refresh" (click)="loadLogs()" [disabled]="loading()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+        </svg>
+        {{ translationService.currentLanguage() === 'uz' ? 'Yangilash' : 'Обновить' }}
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>{{ translationService.t('common.loading') }}</p>
+    </div>
+  } @else if (logs().length === 0) {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p>{{ translationService.currentLanguage() === 'uz' ? 'Xatoliklar yo\'q' : 'Нет ошибок' }}</p>
+      <small>{{ translationService.currentLanguage() === 'uz' ? 'Tizimda qayd etilgan xatoliklar mavjud emas' : 'В системе нет зарегистрированных ошибок' }}</small>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table class="logs-table">
+        <thead>
+          <tr>
+            <th class="col-status">{{ translationService.currentLanguage() === 'uz' ? 'Holat' : 'Статус' }}</th>
+            <th class="col-method">{{ translationService.currentLanguage() === 'uz' ? 'Usul' : 'Метод' }}</th>
+            <th class="col-path">{{ translationService.currentLanguage() === 'uz' ? 'Yo\'l' : 'Путь' }}</th>
+            <th class="col-message">{{ translationService.currentLanguage() === 'uz' ? 'Xabar' : 'Сообщение' }}</th>
+            <th class="col-source">{{ translationService.currentLanguage() === 'uz' ? 'Manba' : 'Источник' }}</th>
+            <th class="col-time">{{ translationService.currentLanguage() === 'uz' ? 'Vaqt' : 'Время' }}</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of logs(); track log.id) {
+            <tr (click)="log.stackTrace ? toggleExpand(log.id) : null" class="log-row" [class.expanded]="expandedLog() === log.id" [class.clickable]="log.stackTrace">
+              <td>
+                <span class="status-badge" [class]="statusBadgeClass(log.statusCode)">{{ log.statusCode }}</span>
+              </td>
+              <td><code class="method-tag">{{ log.method || '-' }}</code></td>
+              <td class="path-cell" title="{{ log.path }}">{{ log.path || '-' }}</td>
+              <td class="message-cell" title="{{ log.message }}">{{ truncateMessage(log.message) }}</td>
+              <td>{{ log.source || '-' }}</td>
+              <td class="time-cell">{{ formatTimestamp(log.timestamp) }}</td>
+              <td>
+                @if (log.stackTrace) {
+                  <button class="btn-expand" (click)="toggleExpand(log.id); $event.stopPropagation()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"
+                      [style.transform]="expandedLog() === log.id ? 'rotate(180deg)' : ''" style="transition: transform 0.2s">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </button>
+                }
+              </td>
+            </tr>
+            @if (expandedLog() === log.id && log.stackTrace) {
+              <tr class="stacktrace-row">
+                <td colspan="7">
+                  <div class="stacktrace-content">
+                    <div class="stacktrace-header">
+                      <strong>{{ translationService.currentLanguage() === 'uz' ? 'To\'liq xato:' : 'Полная ошибка:' }}</strong>
+                    </div>
+                    <pre>{{ log.stackTrace }}</pre>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        @if (page() > 3) {
+          <button class="page-btn" (click)="goToPage(1)">1</button>
+          <span class="page-ellipsis">...</span>
+        }
+
+        @for (p of pageNumbers(); track p) {
+          <button class="page-btn" [class.active]="p === page()" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        @if (page() < totalPages() - 2) {
+          <span class="page-ellipsis">...</span>
+          <button class="page-btn" (click)="goToPage(totalPages())">{{ totalPages() }}</button>
+        }
+
+        <button class="page-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    }
+
+    <div class="table-footer">
+      <span>{{ translationService.currentLanguage() === 'uz' ? 'Sahifa' : 'Страница' }} {{ page() }} / {{ totalPages() }}</span>
+      <span>{{ translationService.currentLanguage() === 'uz' ? 'Ko\'rsatilmoqda' : 'Показано' }} {{ logs().length }} / {{ totalCount() }}</span>
+    </div>
+  }
+</div>

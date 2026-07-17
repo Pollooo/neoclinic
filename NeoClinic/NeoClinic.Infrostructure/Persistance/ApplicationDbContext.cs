@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<MediaFile> MediaFiles { get; set; }
     public DbSet<Admin> Admins { get; set; }
     public DbSet<TelegramUser> TelegramUsers { get; set; }
+    public DbSet<ErrorLog> ErrorLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

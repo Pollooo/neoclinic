@@ -14,6 +14,7 @@ import { DeleteMediaFileRequest, GetMediaFilesRequest, UpdateMediaFileRequest, U
 import { CreateServiceRequest, DeleteServiceRequest, GetServicesRequest, UpdateServiceRequest } from "../models/request-models/service-request.modet";
 import { GetServicesResponse } from "../models/response-models/service-response.model";
 import { GetMediaFilesResponse } from "../models/response-models/media-file-response.model";
+import { GetErrorLogsResponse } from "../models/response-models/error-log-response.model";
 import { HttpParams } from "@angular/common/http";
 
 @Injectable({
@@ -181,5 +182,12 @@ import { HttpParams } from "@angular/common/http";
             params = params.set('serviceId', request.serviceId);
         }
         return this.httpService.get<GetServicesResponse[]>(routes.services.get, { params });
+    }
+
+    public getErrorLogsRequest(page: number = 1, pageSize: number = 10): Observable<GetErrorLogsResponse> {
+        let params = new HttpParams()
+            .set('page', page.toString())
+            .set('pageSize', pageSize.toString());
+        return this.httpService.get<GetErrorLogsResponse>(routes.error_logs.get, { params });
     }
   } 

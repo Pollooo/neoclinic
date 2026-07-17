@@ -8,6 +8,8 @@ import { GetDoctorsResponse } from '../../../core/models/response-models/doctor-
 import { GetContactMessageResponse } from '../../../core/models/response-models/contact-message-response.model';
 import { GetMediaFilesResponse } from '../../../core/models/response-models/media-file-response.model';
 import { NotificationService } from '../../../core/services/notification.service';
+import { environment } from '../../../environments/environment';
+import { routes } from '../../../shared/routes';
 
 @Component({
   selector: 'app-home',
@@ -57,7 +59,7 @@ export class HomeComponent implements OnInit {
           m.fileDescriptionRu?.toLowerCase().includes('background')
         );
         if (backgroundMedia) {
-          this.backgroundImage.set(backgroundMedia.fileUrl);
+          this.backgroundImage.set(this.getMediaUrl(backgroundMedia.fileUrl, backgroundMedia.blobName));
         }
       },
       error: (error) => {
@@ -110,10 +112,24 @@ export class HomeComponent implements OnInit {
       : (doctor.bioRu || '');
   }
 
+  public getDoctorPhotoUrl(doctor: GetDoctorsResponse): string {
+    if (doctor.blobName) {
+      return `${environment.apiBaseUrl}/${routes.media_files.proxy(doctor.blobName)}`;
+    }
+    return doctor.photoUrl ?? '';
+  }
+
   public getServiceName(service: GetServicesResponse): string {
     return this.translationService.currentLanguage() === 'uz' 
       ? service.nameUz 
       : service.nameRu;
+  }
+
+  public getMediaUrl(fileUrl: string, blobName?: string): string {
+    if (blobName) {
+      return `${environment.apiBaseUrl}/${routes.media_files.proxy(blobName)}`;
+    }
+    return fileUrl;
   }
 
   public getServiceDescription(service: GetServicesResponse): string {

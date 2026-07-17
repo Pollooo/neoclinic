@@ -10,6 +10,7 @@ public static class EndpointGroupBase
         app.MapServiceEndpoints();
         app.MapMediaFileEndpoints();
         app.MapContactMessageEndpoints();
+        app.MapErrorLogEndpoints();
         return app;
     }
 }

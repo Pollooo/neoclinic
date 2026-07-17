@@ -5,6 +5,8 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { ApiService } from '../../../core/services/api.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { GetDoctorsResponse } from '../../../core/models/response-models/doctor-response.model';
+import { environment } from '../../../environments/environment';
+import { routes } from '../../../shared/routes';
 import { from, Observable, of, switchMap } from 'rxjs';
 
 /** Output size of the cropped square (px) sent to the server */
@@ -102,9 +104,9 @@ export class DoctorsManagementComponent implements OnInit {
       bioRu: doctor.bioRu || '',
       specialtyRu: doctor.specialtyRu || ''
     });
-    // Show existing photo but mark as "not a new file"
+    // Show existing photo (via proxy if blobName available) but mark as "not a new file"
     this.selectedFile.set(null);
-    this.previewUrl.set(doctor.photoUrl || null);
+    this.previewUrl.set(this.getDoctorPhotoUrl(doctor) || null);
     this.hasNewFile.set(false);
     this.resetAdjustments();
   }
@@ -474,5 +476,12 @@ export class DoctorsManagementComponent implements OnInit {
   public getDoctorBio(doctor: GetDoctorsResponse): string {
     return this.translationService.currentLanguage() === 'uz'
       ? (doctor.bioUz || '') : (doctor.bioRu || '');
+  }
+
+  public getDoctorPhotoUrl(doctor: GetDoctorsResponse): string {
+    if (doctor.blobName) {
+      return `${environment.apiBaseUrl}/${routes.media_files.proxy(doctor.blobName)}`;
+    }
+    return doctor.photoUrl ?? '';
   }
 }
