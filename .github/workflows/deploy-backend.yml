@@ -2,12 +2,12 @@ name: Deploy Backend
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
-      - 'NeoClinic.Api/**'
-      - 'NeoClinic.Application/**'
-      - 'NeoClinic.Domain/**'
-      - 'NeoClinic.Infrostructure/**'
+      - 'NeoClinic/NeoClinic.Api/**'
+      - 'NeoClinic/NeoClinic.Application/**'
+      - 'NeoClinic/NeoClinic.Domain/**'
+      - 'NeoClinic/NeoClinic.Infrostructure/**'
       - '.github/workflows/deploy-backend.yml'
 
 jobs:
@@ -22,13 +22,13 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore NeoClinic.Api/NeoClinic.Api.csproj
+        run: dotnet restore NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj
 
       - name: Build
-        run: dotnet build NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-restore
+        run: dotnet build NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-restore
 
       - name: Publish
-        run: dotnet publish NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-build -o publish
+        run: dotnet publish NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-build -o publish
 
       - name: Inject secrets into appsettings.json
         env:
