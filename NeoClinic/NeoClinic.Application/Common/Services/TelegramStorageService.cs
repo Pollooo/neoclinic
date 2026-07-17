@@ -1,7 +1,9 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using NeoClinic.Application.Common.Interfaces;
+using NeoClinic.Domain.Entities;
 using NeoClinic.Domain.Enums;
 
 namespace NeoClinic.Application.Common.Services;
@@ -9,21 +11,19 @@ namespace NeoClinic.Application.Common.Services;
 public class TelegramStorageService : IStorageService
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IApplicationDbContext _dbContext;
     private readonly string _botToken;
     private readonly long _chatId;
-    private readonly string _mappingFilePath;
 
-    private Dictionary<string, TelegramFileMapping> _mappings = [];
-    private readonly object _lock = new();
-
-    public TelegramStorageService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public TelegramStorageService(
+        IConfiguration configuration,
+        IHttpClientFactory httpClientFactory,
+        IApplicationDbContext dbContext)
     {
         _httpClientFactory = httpClientFactory;
+        _dbContext = dbContext;
         _botToken = configuration["TelegramStorage:BotToken"] ?? throw new ArgumentNullException("TelegramStorage:BotToken");
         _chatId = long.Parse(configuration["TelegramStorage:ChatId"] ?? throw new ArgumentNullException("TelegramStorage:ChatId"));
-
-            _mappingFilePath = Path.Combine(AppContext.BaseDirectory, "telegram-mappings.json");
-        LoadMappings();
     }
 
     public string GenerateBlobName(MediaType mediaType, string fileName)
@@ -75,7 +75,16 @@ public class TelegramStorageService : IStorageService
             var fileId = jsonDoc.RootElement.GetProperty("result").GetProperty("document").GetProperty("file_id").GetString()
                 ?? throw new Exception("Telegram response missing file_id");
 
-            SaveMapping(blobName, fileId, GetContentType(blobName));
+            var contentType = GetContentType(blobName);
+
+            _dbContext.TelegramFileMaps.Add(new TelegramFileMap
+            {
+                BlobName = blobName,
+                FileId = fileId,
+                ContentType = contentType,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _dbContext.SaveChangesAsync();
 
             return $"tg://file/{fileId}";
         }
@@ -89,8 +98,16 @@ public class TelegramStorageService : IStorageService
     {
         try
         {
-            RemoveMapping(blobName);
-            return await Task.FromResult(true);
+            var mapping = await _dbContext.TelegramFileMaps
+                .FirstOrDefaultAsync(m => m.BlobName == blobName);
+
+            if (mapping is not null)
+            {
+                _dbContext.TelegramFileMaps.Remove(mapping);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return true;
         }
         catch
         {
@@ -98,24 +115,24 @@ public class TelegramStorageService : IStorageService
         }
     }
 
-    public Task<string> GetPublicUrl(string blobName)
+    public async Task<string> GetPublicUrl(string blobName)
     {
-        var mapping = GetMapping(blobName);
-        if (mapping is not null)
-        {
-            return Task.FromResult($"tg://file/{mapping.FileId}");
-        }
+        var mapping = await _dbContext.TelegramFileMaps
+            .FirstOrDefaultAsync(m => m.BlobName == blobName);
 
-        return Task.FromResult(blobName);
+        if (mapping is not null)
+            return $"tg://file/{mapping.FileId}";
+
+        return blobName;
     }
 
     public async Task<(byte[] Content, string ContentType)> GetFileBytesAsync(string blobName)
     {
-        var mapping = GetMapping(blobName);
+        var mapping = await _dbContext.TelegramFileMaps
+            .FirstOrDefaultAsync(m => m.BlobName == blobName);
+
         if (mapping is null)
-        {
             return ([], "application/octet-stream");
-        }
 
         try
         {
@@ -147,7 +164,7 @@ public class TelegramStorageService : IStorageService
         }
     }
 
-    private string GetContentType(string fileName)
+    private static string GetContentType(string fileName)
     {
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
         return extension switch
@@ -162,73 +179,8 @@ public class TelegramStorageService : IStorageService
         };
     }
 
-    private void LoadMappings()
-    {
-        try
-        {
-            if (File.Exists(_mappingFilePath))
-            {
-                var json = File.ReadAllText(_mappingFilePath);
-                _mappings = JsonSerializer.Deserialize<Dictionary<string, TelegramFileMapping>>(json) ?? [];
-            }
-        }
-        catch
-        {
-            _mappings = [];
-        }
-    }
-
-    private void SaveMappings()
-    {
-        try
-        {
-            var json = JsonSerializer.Serialize(_mappings, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(_mappingFilePath, json);
-        }
-        catch
-        {
-        }
-    }
-
-    private void SaveMapping(string blobName, string fileId, string contentType)
-    {
-        lock (_lock)
-        {
-            _mappings[blobName] = new TelegramFileMapping
-            {
-                FileId = fileId,
-                ContentType = contentType
-            };
-            SaveMappings();
-        }
-    }
-
-    private void RemoveMapping(string blobName)
-    {
-        lock (_lock)
-        {
-            _mappings.Remove(blobName);
-            SaveMappings();
-        }
-    }
-
-    private TelegramFileMapping? GetMapping(string blobName)
-    {
-        lock (_lock)
-        {
-            _mappings.TryGetValue(blobName, out var mapping);
-            return mapping;
-        }
-    }
-
     private static string TruncateJson(string json, int maxLen)
     {
         return json.Length <= maxLen ? json : json[..maxLen] + "...";
-    }
-
-    private class TelegramFileMapping
-    {
-        public string FileId { get; set; } = string.Empty;
-        public string ContentType { get; set; } = string.Empty;
     }
 }

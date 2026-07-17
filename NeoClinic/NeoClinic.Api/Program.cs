@@ -6,6 +6,12 @@ using NeoClinic.Infrostructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var envPath = Path.Combine(builder.Environment.ContentRootPath, "..", ".env");
+if (File.Exists(envPath))
+{
+    DotNetEnv.Env.Load(envPath);
+}
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGenWithAuth();
 builder.Services.AddApplication(builder.Configuration);

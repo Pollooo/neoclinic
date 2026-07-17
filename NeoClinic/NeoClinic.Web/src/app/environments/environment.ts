@@ -1,4 +1,4 @@
 export const environment = {
     production: false,
-    apiBaseUrl: 'https://uzclinic.runasp.net/api',
+    apiBaseUrl: 'https://localhost:7071/api',
 }

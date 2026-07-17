@@ -1,0 +1,68 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'NeoClinic.Api/**'
+      - 'NeoClinic.Application/**'
+      - 'NeoClinic.Domain/**'
+      - 'NeoClinic.Infrostructure/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore NeoClinic.Api/NeoClinic.Api.csproj
+
+      - name: Build
+        run: dotnet build NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-restore
+
+      - name: Publish
+        run: dotnet publish NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-build -o publish
+
+      - name: Inject secrets into appsettings.json
+        env:
+          DB: ${{ secrets.ConnectionStrings__Database }}
+          JWT_KEY: ${{ secrets.Jwt__Key }}
+          AZURE: ${{ secrets.AzureBlob__ConnectionString }}
+          TEL_BOT: ${{ secrets.Telegram__BotToken }}
+          TEL_CHAT: ${{ secrets.Telegram__ChatId }}
+          TEL_STORAGE_BOT: ${{ secrets.TelegramStorage__BotToken }}
+          TEL_STORAGE_CHAT: ${{ secrets.TelegramStorage__ChatId }}
+        run: |
+          cd publish
+          jq --arg db "$DB" \
+             --arg jwt "$JWT_KEY" \
+             --arg azure "$AZURE" \
+             --arg telBot "$TEL_BOT" \
+             --arg telChat "$TEL_CHAT" \
+             --arg telStorageBot "$TEL_STORAGE_BOT" \
+             --arg telStorageChat "$TEL_STORAGE_CHAT" \
+            '.ConnectionStrings.Database = $db
+            | .Jwt.Key = $jwt
+            | .AzureBlob.ConnectionString = $azure
+            | .Telegram.BotToken = $telBot
+            | .Telegram.ChatId = $telChat
+            | .TelegramStorage.BotToken = $telStorageBot
+            | .TelegramStorage.ChatId = $telStorageChat' \
+            appsettings.json > appsettings.json.tmp \
+            && mv appsettings.json.tmp appsettings.json
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: publish/
+          server-dir: /
