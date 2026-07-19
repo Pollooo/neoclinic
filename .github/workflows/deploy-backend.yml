@@ -12,7 +12,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -31,6 +31,7 @@ jobs:
         run: dotnet publish NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-build -o publish
 
       - name: Inject secrets into appsettings.json
+        shell: powershell
         env:
           DB: ${{ secrets.ConnectionStrings__Database }}
           JWT_KEY: ${{ secrets.Jwt__Key }}
@@ -40,29 +41,41 @@ jobs:
           TEL_STORAGE_BOT: ${{ secrets.TelegramStorage__BotToken }}
           TEL_STORAGE_CHAT: ${{ secrets.TelegramStorage__ChatId }}
         run: |
-          cd publish
-          jq --arg db "$DB" \
-             --arg jwt "$JWT_KEY" \
-             --arg azure "$AZURE" \
-             --arg telBot "$TEL_BOT" \
-             --arg telChat "$TEL_CHAT" \
-             --arg telStorageBot "$TEL_STORAGE_BOT" \
-             --arg telStorageChat "$TEL_STORAGE_CHAT" \
-            '.ConnectionStrings.Database = $db
-            | .Jwt.Key = $jwt
-            | .AzureBlob.ConnectionString = $azure
-            | .Telegram.BotToken = $telBot
-            | .Telegram.ChatId = $telChat
-            | .TelegramStorage.BotToken = $telStorageBot
-            | .TelegramStorage.ChatId = $telStorageChat' \
-            appsettings.json > appsettings.json.tmp \
-            && mv appsettings.json.tmp appsettings.json
+          $path = "publish\appsettings.json"
+          $json = Get-Content $path -Raw | ConvertFrom-Json
+          $json.ConnectionStrings.Database = $env:DB
+          $json.Jwt.Key = $env:JWT_KEY
+          $json.AzureBlob.ConnectionString = $env:AZURE
+          $json.Telegram.BotToken = $env:TEL_BOT
+          $json.Telegram.ChatId = $env:TEL_CHAT
+          $json.TelegramStorage.BotToken = $env:TEL_STORAGE_BOT
+          $json.TelegramStorage.ChatId = $env:TEL_STORAGE_CHAT
+          $json | ConvertTo-Json -Depth 10 | Set-Content $path
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: publish/
-          server-dir: /
+      - name: Write version file
+        shell: powershell
+        run: Set-Content -Path publish\version.txt -Value "${{ github.sha }}"
+
+      - name: Install Web Deploy
+        run: choco install webdeploy -y --no-progress
+
+      - name: Deploy via MSDeploy
+        shell: powershell
+        run: |
+          & "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" `
+            -source:contentPath='publish' `
+            -dest:contentPath='site58252',computerName="https://site58252.siteasp.net:8172/MsDeploy.axd",username='site58252',password='${{ secrets.MSDEPLOY_PASSWORD }}',authType='Basic' `
+            -allowUntrusted `
+            -verb:sync `
+            -enableRule:DoNotDeleteRule
+
+      - name: Verify deployment
+        shell: powershell
+        run: |
+          Start-Sleep -Seconds 5
+          try {
+            $r = Invoke-WebRequest -Uri https://uzclinic.runasp.net/health -UseBasicParsing
+            Write-Host "✅ App is running"
+          } catch {
+            Write-Host "⚠️ Health check failed"
+          }
