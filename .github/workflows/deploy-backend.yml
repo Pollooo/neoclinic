@@ -63,11 +63,12 @@ jobs:
         shell: powershell
         run: |
           $source = "${{ github.workspace }}\publish"
-          $computerName = "https://site58252.siteasp.net:8172/MsDeploy.axd"
-          $password = [System.Uri]::EscapeDataString("${{ secrets.MSDEPLOY_PASSWORD }}")
+          $computerName = 'https://site58252.siteasp.net:8172/msdeploy.axd?site=site58252'
+          $username = 'site58252'
+          $password = '${{ secrets.MSDEPLOY_PASSWORD }}'
           & "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" `
             -source:contentPath=$source `
-            -dest:contentPath=site58252,computerName=$computerName,username=site58252,password=$password,authType=Basic `
+            -dest:contentPath=$username,computerName=$computerName,userName=$username,password=$password,authType=Basic,includeAcls=False `
             -allowUntrusted `
             -verb:sync `
             -enableRule:DoNotDeleteRule
