@@ -71,7 +71,8 @@ jobs:
             -dest:contentPath=$username,computerName=$computerName,userName=$username,password=$password,authType=Basic,includeAcls=False `
             -allowUntrusted `
             -verb:sync `
-            -enableRule:DoNotDeleteRule
+            -enableRule:DoNotDeleteRule `
+            -enableRule:AppOffline
 
       - name: Verify deployment
         shell: powershell
