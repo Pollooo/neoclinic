@@ -25,13 +25,13 @@ jobs:
         run: dotnet restore NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj
 
       - name: Build
-        run: dotnet build NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-restore
+        run: dotnet build NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release
 
       - name: Publish
         run: dotnet publish NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-build -o publish
 
-      - name: Inject secrets into appsettings.json
-        shell: powershell
+      - name: Generate appsettings.json with secrets
+        shell: pwsh
         env:
           DB: ${{ secrets.ConnectionStrings__Database }}
           JWT_KEY: ${{ secrets.Jwt__Key }}
@@ -41,20 +41,68 @@ jobs:
           TEL_STORAGE_BOT: ${{ secrets.TelegramStorage__BotToken }}
           TEL_STORAGE_CHAT: ${{ secrets.TelegramStorage__ChatId }}
         run: |
-          $path = "publish\appsettings.json"
-          $json = Get-Content $path -Raw | ConvertFrom-Json
-          $json.ConnectionStrings.Database = $env:DB
-          $json.Jwt.Key = $env:JWT_KEY
-          $json.AzureBlob.ConnectionString = $env:AZURE
-          $json.Telegram.BotToken = $env:TEL_BOT
-          $json.Telegram.ChatId = $env:TEL_CHAT
-          $json.TelegramStorage.BotToken = $env:TEL_STORAGE_BOT
-          $json.TelegramStorage.ChatId = $env:TEL_STORAGE_CHAT
-          $json | ConvertTo-Json -Depth 10 | Set-Content $path
+          python -c @"
+          import json, os
+          data = {
+              "Logging": {"LogLevel": {"Default": "Information", "Microsoft.AspNetCore": "Warning"}},
+              "ConnectionStrings": {"Database": os.environ["DB"]},
+              "Firebase": {"CredentialsPath": "Keys/ServiceAccountKey.json", "BucketName": "clinic-c21c4.firebasestorage.app"},
+              "Jwt": {"Key": os.environ["JWT_KEY"], "Issuer": "NeoClinic", "Audience": "NeoClinicUsers", "AccessTokenMinutes": 60},
+              "AzureBlob": {"ConnectionString": os.environ["AZURE"], "ContainerName": "neo-clinic-docs"},
+              "Telegram": {"BotToken": os.environ["TEL_BOT"], "ChatId": os.environ["TEL_CHAT"]},
+              "Appwrite": {"Endpoint": "", "ProjectId": "", "ApiKey": "", "BucketId": ""},
+              "TelegramStorage": {"BotToken": os.environ["TEL_STORAGE_BOT"], "ChatId": os.environ["TEL_STORAGE_CHAT"]}
+          }
+          with open("publish/appsettings.json", "w", encoding="utf-8") as f:
+              json.dump(data, f, indent=2)
+          print("appsettings.json generated successfully")
+          "@
+
+      - name: Fix web.config for Production
+        shell: pwsh
+        run: |
+          python -c @"
+          import os
+          with open("publish/web.config") as f:
+              content = f.read()
+          content = content.replace('stdoutLogEnabled="false"', 'stdoutLogEnabled="true"')
+          if "ASPNETCORE_ENVIRONMENT" not in content:
+              content = content.replace("</aspNetCore>", '<environmentVariables><environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" /></environmentVariables></aspNetCore>')
+          os.makedirs("publish/logs", exist_ok=True)
+          with open("publish/web.config", "w", encoding="utf-8") as f:
+              f.write(content)
+          print("web.config updated successfully")
+          "@
+
+      - name: Remove stale config files
+        shell: bash
+        run: |
+          rm -f publish/appsettings.Development.json
+          rm -f publish/appsettings.Staging.json
 
       - name: Write version file
-        shell: powershell
-        run: Set-Content -Path publish\version.txt -Value "${{ github.sha }}"
+        shell: bash
+        run: echo "${{ github.sha }}" > publish/version.txt
+
+      - name: Diagnose publish output
+        shell: pwsh
+        run: |
+          Write-Host "=== Files in publish ==="
+          Get-ChildItem publish/ | Select-Object Name, Length | Format-Table -AutoSize
+          Write-Host ""
+          Write-Host "=== appsettings.json (first 200 chars) ==="
+          $json = Get-Content publish/appsettings.json -Raw
+          Write-Host $json.Substring(0, [Math]::Min(200, $json.Length))
+          Write-Host ""
+          Write-Host "=== appsettings.json BOM check ==="
+          $bytes = [System.IO.File]::ReadAllBytes("publish/appsettings.json")
+          Write-Host "First 3 bytes: $($bytes[0]) $($bytes[1]) $($bytes[2]) (expect 123 10 or 123 13 10 = valid JSON start)"
+          Write-Host ""
+          Write-Host "=== web.config ==="
+          Get-Content publish/web.config -Raw
+          Write-Host ""
+          Write-Host "=== appsettings.Development.json exists? ==="
+          Test-Path publish/appsettings.Development.json
 
       - name: Install Web Deploy
         run: choco install webdeploy -y --no-progress
@@ -77,10 +125,16 @@ jobs:
       - name: Verify deployment
         shell: powershell
         run: |
-          Start-Sleep -Seconds 5
+          Start-Sleep -Seconds 10
           try {
             $r = Invoke-WebRequest -Uri https://uzclinic.runasp.net/health -UseBasicParsing
-            Write-Host "✅ App is running"
+            Write-Host "Health: $($r.StatusCode) - $($r.Content)"
           } catch {
-            Write-Host "⚠️ Health check failed"
+            Write-Host "Health check failed: $_"
+          }
+          try {
+            $v = Invoke-WebRequest -Uri https://uzclinic.runasp.net/version -UseBasicParsing
+            Write-Host "Version: $($v.Content)"
+          } catch {
+            Write-Host "Version check failed: $_"
           }
