@@ -41,38 +41,45 @@ jobs:
           TEL_STORAGE_BOT: ${{ secrets.TelegramStorage__BotToken }}
           TEL_STORAGE_CHAT: ${{ secrets.TelegramStorage__ChatId }}
         run: |
-          python -c @"
-          import json, os
-          data = {
-              "Logging": {"LogLevel": {"Default": "Information", "Microsoft.AspNetCore": "Warning"}},
-              "ConnectionStrings": {"Database": os.environ["DB"]},
-              "Firebase": {"CredentialsPath": "Keys/ServiceAccountKey.json", "BucketName": "clinic-c21c4.firebasestorage.app"},
-              "Jwt": {"Key": os.environ["JWT_KEY"], "Issuer": "NeoClinic", "Audience": "NeoClinicUsers", "AccessTokenMinutes": 60},
-              "AzureBlob": {"ConnectionString": os.environ["AZURE"], "ContainerName": "neo-clinic-docs"},
-              "Telegram": {"BotToken": os.environ["TEL_BOT"], "ChatId": os.environ["TEL_CHAT"]},
-              "Appwrite": {"Endpoint": "", "ProjectId": "", "ApiKey": "", "BucketId": ""},
-              "TelegramStorage": {"BotToken": os.environ["TEL_STORAGE_BOT"], "ChatId": os.environ["TEL_STORAGE_CHAT"]}
+          $data = @{
+            Logging = @{ LogLevel = @{ Default = "Information"; "Microsoft.AspNetCore" = "Warning" } }
+            ConnectionStrings = @{ Database = $env:DB }
+            Firebase = @{ CredentialsPath = "Keys/ServiceAccountKey.json"; BucketName = "clinic-c21c4.firebasestorage.app" }
+            Jwt = @{ Key = $env:JWT_KEY; Issuer = "NeoClinic"; Audience = "NeoClinicUsers"; AccessTokenMinutes = 60 }
+            AzureBlob = @{ ConnectionString = $env:AZURE; ContainerName = "neo-clinic-docs" }
+            Telegram = @{ BotToken = $env:TEL_BOT; ChatId = $env:TEL_CHAT }
+            Appwrite = @{ Endpoint = ""; ProjectId = ""; ApiKey = ""; BucketId = "" }
+            TelegramStorage = @{ BotToken = $env:TEL_STORAGE_BOT; ChatId = $env:TEL_STORAGE_CHAT }
           }
-          with open("publish/appsettings.json", "w", encoding="utf-8") as f:
-              json.dump(data, f, indent=2)
-          print("appsettings.json generated successfully")
-          "@
+          $data | ConvertTo-Json -Depth 10 | Set-Content "publish/appsettings.json" -Encoding UTF8
+          Write-Host "appsettings.json generated successfully"
 
       - name: Fix web.config for Production
         shell: pwsh
         run: |
-          python -c @"
-          import os
-          with open("publish/web.config") as f:
-              content = f.read()
-          content = content.replace('stdoutLogEnabled="false"', 'stdoutLogEnabled="true"')
-          if "ASPNETCORE_ENVIRONMENT" not in content:
-              content = content.replace("</aspNetCore>", '<environmentVariables><environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" /></environmentVariables></aspNetCore>')
-          os.makedirs("publish/logs", exist_ok=True)
-          with open("publish/web.config", "w", encoding="utf-8") as f:
-              f.write(content)
-          print("web.config updated successfully")
-          "@
+          $webConfigPath = "publish/web.config"
+          if (Test-Path $webConfigPath) {
+            $content = Get-Content $webConfigPath -Raw
+
+            $content = $content -replace 'stdoutLogEnabled="false"', 'stdoutLogEnabled="true"'
+
+            if ($content -notmatch "ASPNETCORE_ENVIRONMENT") {
+              if ($content -match '/>') {
+                $content = $content -replace '<aspNetCore\s+([^/]*?)\s*/>', '<aspNetCore $1><environmentVariables><environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" /></environmentVariables></aspNetCore>'
+              } else {
+                $content = $content -replace '</aspNetCore>', '<environmentVariables><environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" /></environmentVariables></aspNetCore>'
+              }
+            }
+
+            $logDir = Join-Path (Split-Path $webConfigPath) "logs"
+            New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+
+            Set-Content $webConfigPath -Value $content -Encoding UTF8
+            Write-Host "web.config updated successfully"
+            Get-Content $webConfigPath -Raw
+          } else {
+            Write-Host "WARNING: web.config not found in publish output"
+          }
 
       - name: Remove stale config files
         shell: bash
@@ -90,19 +97,15 @@ jobs:
           Write-Host "=== Files in publish ==="
           Get-ChildItem publish/ | Select-Object Name, Length | Format-Table -AutoSize
           Write-Host ""
-          Write-Host "=== appsettings.json (first 200 chars) ==="
-          $json = Get-Content publish/appsettings.json -Raw
-          Write-Host $json.Substring(0, [Math]::Min(200, $json.Length))
+          Write-Host "=== appsettings.json ==="
+          Get-Content publish/appsettings.json -Raw
           Write-Host ""
-          Write-Host "=== appsettings.json BOM check ==="
-          $bytes = [System.IO.File]::ReadAllBytes("publish/appsettings.json")
-          Write-Host "First 3 bytes: $($bytes[0]) $($bytes[1]) $($bytes[2]) (expect 123 10 or 123 13 10 = valid JSON start)"
-          Write-Host ""
-          Write-Host "=== web.config ==="
-          Get-Content publish/web.config -Raw
-          Write-Host ""
-          Write-Host "=== appsettings.Development.json exists? ==="
-          Test-Path publish/appsettings.Development.json
+          if (Test-Path publish/web.config) {
+            Write-Host "=== web.config ==="
+            Get-Content publish/web.config -Raw
+          } else {
+            Write-Host "=== web.config: NOT FOUND ==="
+          }
 
       - name: Install Web Deploy
         run: choco install webdeploy -y --no-progress
@@ -110,31 +113,35 @@ jobs:
       - name: Deploy via MSDeploy
         shell: powershell
         run: |
+          $ErrorActionPreference = 'Stop'
           $source = "${{ github.workspace }}\publish"
           $computerName = 'https://site58252.siteasp.net:8172/msdeploy.axd?site=site58252'
           $username = 'site58252'
-          $password = '${{ secrets.MSDEPLOY_PASSWORD }}'
+          $password = "${{ secrets.MSDEPLOY_PASSWORD }}"
+
+          Write-Host "Deploying from: $source"
+          Write-Host "Target: $computerName"
+          Write-Host "Username: $username"
+
           & "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" `
-            -source:contentPath=$source `
-            -dest:contentPath=$username,computerName=$computerName,userName=$username,password=$password,authType=Basic,includeAcls=False `
+            -source:contentPath="$source" `
+            -dest:contentPath="$username",computerName="$computerName",userName="$username",password="$password",authType=Basic,includeAcls=False `
             -allowUntrusted `
             -verb:sync `
             -enableRule:DoNotDeleteRule `
             -enableRule:AppOffline
 
+          if ($LASTEXITCODE -ne 0) {
+            throw "MSDeploy failed with exit code $LASTEXITCODE"
+          }
+          Write-Host "MSDeploy deployment completed successfully"
+
       - name: Verify deployment
         shell: powershell
         run: |
-          Start-Sleep -Seconds 10
-          try {
-            $r = Invoke-WebRequest -Uri https://uzclinic.runasp.net/health -UseBasicParsing
-            Write-Host "Health: $($r.StatusCode) - $($r.Content)"
-          } catch {
-            Write-Host "Health check failed: $_"
-          }
-          try {
-            $v = Invoke-WebRequest -Uri https://uzclinic.runasp.net/version -UseBasicParsing
-            Write-Host "Version: $($v.Content)"
-          } catch {
-            Write-Host "Version check failed: $_"
+          Start-Sleep -Seconds 15
+          $r = Invoke-WebRequest -Uri "https://uzclinic.runasp.net/health" -UseBasicParsing -TimeoutSec 30
+          Write-Host "Health: $($r.StatusCode) - $($r.Content)"
+          if ($r.StatusCode -ne 200) {
+            throw "Health check failed with status $($r.StatusCode)"
           }
