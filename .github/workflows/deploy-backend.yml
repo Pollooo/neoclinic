@@ -23,7 +23,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj
+        run: dotnet restore NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj --runtime win-x86
 
       - name: Build
         run: dotnet build NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release
