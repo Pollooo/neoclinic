@@ -77,8 +77,9 @@ public class ExceptionLoggingMiddleware
 
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
+            var errorDetail = $"{ex.GetType().Name}: {ex.Message}".Replace("\"", "'").Replace("\n", " ").Replace("\r", "");
             await context.Response.WriteAsync(
-                """{"message":"An unexpected error occurred. Please try again later.","statusCode":500}""");
+                $$"""{"message":"An unexpected error occurred. Please try again later.","statusCode":500,"error":"{{errorDetail}}"}""");
         }
         finally
         {
