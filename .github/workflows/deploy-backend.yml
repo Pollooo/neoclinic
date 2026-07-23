@@ -23,13 +23,13 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj --runtime win-x86
+        run: dotnet restore NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj
 
       - name: Build
         run: dotnet build NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release
 
       - name: Publish
-        run: dotnet publish NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-build -o publish --runtime win-x86 --self-contained false
+        run: dotnet publish NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-build -o publish
 
       - name: Generate appsettings.json with secrets
         shell: pwsh
