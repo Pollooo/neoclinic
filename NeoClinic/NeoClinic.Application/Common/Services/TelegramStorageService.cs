@@ -41,13 +41,11 @@ public class TelegramStorageService : IStorageService
             if (content.CanSeek)
                 content.Seek(0, SeekOrigin.Begin);
 
-            using var memoryStream = new MemoryStream();
-            await content.CopyToAsync(memoryStream);
-            var fileBytes = memoryStream.ToArray();
-
             var httpClient = _httpClientFactory.CreateClient("TelegramStorage");
+            var isVideo = blobName.Contains("/videos/");
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.telegram.org/bot{_botToken}/sendDocument");
+            using var request = new HttpRequestMessage(HttpMethod.Post,
+                $"https://api.telegram.org/bot{_botToken}/{(isVideo ? "sendVideo" : "sendDocument")}");
             request.Headers.Add("Accept", "application/json");
 
             var multipartContent = new MultipartFormDataContent();
@@ -57,9 +55,9 @@ public class TelegramStorageService : IStorageService
             if (string.IsNullOrEmpty(fileName))
                 fileName = "file";
 
-            var fileContent = new ByteArrayContent(fileBytes);
-            fileContent.Headers.ContentType = new MediaTypeHeaderValue(GetContentType(blobName));
-            multipartContent.Add(fileContent, "document", fileName);
+            var streamContent = new StreamContent(content);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(GetContentType(blobName));
+            multipartContent.Add(streamContent, isVideo ? "video" : "document", fileName);
 
             request.Content = multipartContent;
 
@@ -72,7 +70,9 @@ public class TelegramStorageService : IStorageService
             }
 
             using var jsonDoc = JsonDocument.Parse(responseBody);
-            var fileId = jsonDoc.RootElement.GetProperty("result").GetProperty("document").GetProperty("file_id").GetString()
+            var result = jsonDoc.RootElement.GetProperty("result");
+
+            var fileId = ExtractFileId(result, isVideo)
                 ?? throw new Exception("Telegram response missing file_id");
 
             var contentType = GetContentType(blobName);
@@ -92,6 +92,20 @@ public class TelegramStorageService : IStorageService
         {
             throw new Exception($"Error uploading file to Telegram Storage: {ex.Message}", ex);
         }
+    }
+
+    private static string? ExtractFileId(JsonElement result, bool isVideo)
+    {
+        if (isVideo && result.TryGetProperty("video", out var video) && video.TryGetProperty("file_id", out var vidId))
+            return vidId.GetString();
+
+        if (result.TryGetProperty("document", out var doc) && doc.TryGetProperty("file_id", out var docId))
+            return docId.GetString();
+
+        if (result.TryGetProperty("video", out var vid) && vid.TryGetProperty("file_id", out var vidId2))
+            return vidId2.GetString();
+
+        return null;
     }
 
     public async Task<bool> DeleteFileAsync(string blobName)
