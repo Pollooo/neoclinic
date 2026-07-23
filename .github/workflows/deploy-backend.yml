@@ -93,7 +93,7 @@ jobs:
         run: echo "${{ github.sha }}" > publish/version.txt
 
       - name: Deploy to MonsterASP via WebDeploy
-        uses: rasmusbuchholdt/simply-web-deploy@v2.2.0
+        uses: rasmusbuchholdt/simply-web-deploy@2.2.0
         with:
           website-name: site58252
           server-computer-name: https://site58252.siteasp.net:8172
