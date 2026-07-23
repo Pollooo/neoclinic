@@ -26,7 +26,7 @@ jobs:
         run: dotnet restore NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj
 
       - name: Build
-        run: dotnet build NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release
+        run: dotnet build NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-restore
 
       - name: Publish
         run: dotnet publish NeoClinic/NeoClinic.Api/NeoClinic.Api.csproj -c Release --no-build -o publish
@@ -53,7 +53,8 @@ jobs:
             TelegramStorage = @{ BotToken = $env:TEL_STORAGE_BOT; ChatId = $env:TEL_STORAGE_CHAT }
           }
           $data | ConvertTo-Json -Depth 10 | Set-Content "publish/appsettings.json" -Encoding UTF8
-          Write-Host "appsettings.json generated successfully"
+          Write-Host "=== appsettings.json generated ==="
+          Get-Content publish/appsettings.json -Raw
 
       - name: Fix web.config for Production
         shell: pwsh
@@ -61,9 +62,7 @@ jobs:
           $webConfigPath = "publish/web.config"
           if (Test-Path $webConfigPath) {
             $content = Get-Content $webConfigPath -Raw
-
             $content = $content -replace 'stdoutLogEnabled="false"', 'stdoutLogEnabled="true"'
-
             if ($content -notmatch "ASPNETCORE_ENVIRONMENT") {
               if ($content -match '/>') {
                 $content = $content -replace '<aspNetCore\s+([^/]*?)\s*/>', '<aspNetCore $1><environmentVariables><environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" /></environmentVariables></aspNetCore>'
@@ -71,15 +70,11 @@ jobs:
                 $content = $content -replace '</aspNetCore>', '<environmentVariables><environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" /></environmentVariables></aspNetCore>'
               }
             }
-
             $logDir = Join-Path (Split-Path $webConfigPath) "logs"
             New-Item -ItemType Directory -Path $logDir -Force | Out-Null
-
             Set-Content $webConfigPath -Value $content -Encoding UTF8
-            Write-Host "web.config updated successfully"
+            Write-Host "=== web.config updated ==="
             Get-Content $webConfigPath -Raw
-          } else {
-            Write-Host "WARNING: web.config not found in publish output"
           }
 
       - name: Remove stale config files
@@ -92,22 +87,59 @@ jobs:
         shell: bash
         run: echo "${{ github.sha }}" > publish/version.txt
 
-      - name: Deploy to MonsterASP via WebDeploy
-        uses: rasmusbuchholdt/simply-web-deploy@2.2.0
-        with:
-          website-name: site58252
-          server-computer-name: https://site58252.siteasp.net:8172
-          server-username: site58252
-          server-password: ${{ secrets.MSDEPLOY_PASSWORD }}
-          source-path: '\publish\'
+      - name: List publish folder
+        shell: pwsh
+        run: |
+          Write-Host "=== Files to deploy ==="
+          Get-ChildItem publish/ -Recurse | Select-Object FullName, Length | Format-Table -AutoSize
+
+      - name: Install Web Deploy
+        run: choco install webdeploy -y --no-progress
+
+      - name: Deploy via MSDeploy
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $source = "${{ github.workspace }}\publish"
+          $site = 'site58252'
+          $url = "https://site58252.siteasp.net:8172/msdeploy.axd?site=$site"
+          $user = 'site58252'
+          $pass = '${{ secrets.MSDEPLOY_PASSWORD }}'
+
+          Write-Host "Source: $source"
+          Write-Host "Target: $url"
+          Write-Host "Site: $site"
+
+          $msdeploy = @(
+            "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe",
+            "C:\Program Files (x86)\IIS\Microsoft Web Deploy V3\msdeploy.exe"
+          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+          if (-not $msdeploy) { throw "msdeploy.exe not found" }
+          Write-Host "msdeploy: $msdeploy"
+
+          & $msdeploy `
+            -verb:sync `
+            -source:contentPath="$source" `
+            -dest:contentPath="$site",computerName="$url",userName="$user",password="$pass",authtype="Basic",includeAcls="False" `
+            -allowUntrusted `
+            -disableLink:AppPoolExtension `
+            -disableLink:ContentExtension `
+            -disableLink:CertificateExtension `
+            -verbose
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "MSDeploy failed with exit code $LASTEXITCODE"
+          }
+          Write-Host "=== Deploy succeeded ==="
 
       - name: Warm-up
         shell: pwsh
         run: |
+          Start-Sleep -Seconds 10
           $maxRetries = 5
-          $retryDelay = 15
+          $retryDelay = 10
           $url = "https://uzclinic.runasp.net/health"
-          Write-Host "Warming up $url..."
           for ($i = 1; $i -le $maxRetries; $i++) {
             try {
               $r = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 30
