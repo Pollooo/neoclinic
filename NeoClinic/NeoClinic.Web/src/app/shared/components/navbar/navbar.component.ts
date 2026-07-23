@@ -388,8 +388,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         );
         if (logoMedia) {
           this.logoMedia.set(logoMedia);
-          // Use proxy URL for videos, direct URL for images
-          if (logoMedia.type === 1 && logoMedia.blobName) {
+          if (logoMedia.blobName) {
             this.logoUrl.set(`${environment.apiBaseUrl}/${routes.media_files.proxy(logoMedia.blobName)}`);
           } else {
             this.logoUrl.set(logoMedia.fileUrl);

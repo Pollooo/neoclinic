@@ -2,6 +2,8 @@ import { Component, signal, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ApiService } from './core/services/api.service';
 import { FaviconService } from './core/services/favicon.service';
+import { environment } from './environments/environment';
+import { routes } from './shared/routes';
 
 @Component({
   selector: 'app-root',
@@ -39,7 +41,11 @@ export class App implements OnInit {
           m.fileDescriptionRu?.toLowerCase().includes('logo')
         );
         if (faviconMedia) {
-          this.faviconService.setFavicon(faviconMedia.fileUrl);
+          if (faviconMedia.blobName) {
+            this.faviconService.setFavicon(`${environment.apiBaseUrl}/${routes.media_files.proxy(faviconMedia.blobName)}`);
+          } else {
+            this.faviconService.setFavicon(faviconMedia.fileUrl);
+          }
         }
       },
       error: (error) => {
