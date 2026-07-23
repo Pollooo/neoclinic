@@ -126,6 +126,7 @@ jobs:
             -disableLink:AppPoolExtension `
             -disableLink:ContentExtension `
             -disableLink:CertificateExtension `
+            -enableRule:AppOffline `
             -verbose
 
           if ($LASTEXITCODE -ne 0) {
