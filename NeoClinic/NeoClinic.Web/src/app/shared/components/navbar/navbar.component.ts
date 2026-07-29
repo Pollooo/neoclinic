@@ -382,10 +382,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private loadLogo(): void {
     this.apiService.getMediaFilesRequest({}).subscribe({
       next: (media) => {
-        const logoMedia = media.find(m => 
-          m.fileDescriptionUz?.toLowerCase().includes('clinic name') || 
-          m.fileDescriptionRu?.toLowerCase().includes('clinic name')
-        );
+        const logoMedia = media.find(m => {
+          const descUz = m.fileDescriptionUz?.toLowerCase() || '';
+          const descRu = m.fileDescriptionRu?.toLowerCase() || '';
+          return descUz.includes('clinic name') || descRu.includes('clinic name') ||
+                 descUz.includes('logo') || descRu.includes('logo');
+        });
         if (logoMedia) {
           this.logoMedia.set(logoMedia);
           if (logoMedia.blobName) {
