@@ -1,4 +1,4 @@
-name: Deploy Backend
+name: Deploy
 
 on:
   push:
@@ -8,11 +8,12 @@ on:
       - 'NeoClinic/NeoClinic.Application/**'
       - 'NeoClinic/NeoClinic.Domain/**'
       - 'NeoClinic/NeoClinic.Infrostructure/**'
+      - 'NeoClinic/NeoClinic.Web/**'
       - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -151,3 +152,24 @@ jobs:
               if ($i -lt $maxRetries) { Start-Sleep -Seconds $retryDelay }
             }
           }
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: NeoClinic/NeoClinic.Web
+        run: npm ci
+
+      - name: Build Angular app
+        working-directory: NeoClinic/NeoClinic.Web
+        run: npx ng build
+
+      - name: Deploy to Firebase
+        run: npx firebase-tools deploy --only hosting:frontend --non-interactive --token "${{ secrets.FIREBASE_TOKEN }}"
