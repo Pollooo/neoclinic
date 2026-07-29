@@ -141,17 +141,13 @@ export class HomeComponent implements OnInit {
   private loadGallery(): void {
     this.apiService.getMediaFilesRequest({}).subscribe({
       next: (media) => {
-        // Filter: only images (type 0), exclude background, clinic name, and logo images, take only first 3
+        // Filter: only images (type 0), exclude background images, take only first 3
         const filteredMedia = media.filter(m => {
           const descUz = m.fileDescriptionUz?.toLowerCase() || '';
           const descRu = m.fileDescriptionRu?.toLowerCase() || '';
           return m.type === 0 && // Only images
                  !descUz.includes('background') && 
-                 !descRu.includes('background') && 
-                 !descUz.includes('clinic name') && 
-                 !descRu.includes('clinic name') &&
-                 !descUz.includes('logo') && 
-                 !descRu.includes('logo');
+                 !descRu.includes('background');
         }).slice(0, 3);
         this.galleryMedia.set(filteredMedia);
         this.galleryLoading.set(false);

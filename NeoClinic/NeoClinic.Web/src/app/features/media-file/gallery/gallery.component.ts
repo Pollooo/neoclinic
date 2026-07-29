@@ -42,16 +42,12 @@ export class GalleryComponent implements OnInit {
   private loadMedia(): void {
     this.apiService.getMediaFilesRequest({}).subscribe({
       next: (media) => {
-        // Filter out background, clinic name, and logo images
+        // Filter out background images
         const filteredMedia = media.filter(m => {
           const descUz = m.fileDescriptionUz?.toLowerCase() || '';
           const descRu = m.fileDescriptionRu?.toLowerCase() || '';
           return !descUz.includes('background') && 
-                 !descRu.includes('background') && 
-                 !descUz.includes('clinic name') && 
-                 !descRu.includes('clinic name') &&
-                 !descUz.includes('logo') && 
-                 !descRu.includes('logo');
+                 !descRu.includes('background');
         });
         this.media.set(filteredMedia);
         this.loading.set(false);
