@@ -145,9 +145,13 @@ export class HomeComponent implements OnInit {
         const filteredMedia = media.filter(m => {
           const descUz = m.fileDescriptionUz?.toLowerCase() || '';
           const descRu = m.fileDescriptionRu?.toLowerCase() || '';
-          return m.type === 0 && // Only images
+          return m.type === 0 &&
                  !descUz.includes('background') && 
-                 !descRu.includes('background');
+                 !descRu.includes('background') &&
+                 !descUz.includes('logo') && 
+                 !descRu.includes('logo') &&
+                 !descUz.includes('clinic name') && 
+                 !descRu.includes('clinic name');
         }).slice(0, 3);
         this.galleryMedia.set(filteredMedia);
         this.galleryLoading.set(false);
