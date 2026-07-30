@@ -80,6 +80,11 @@
       </button>
 
       <div class="header-actions">
+        <button class="theme-btn" (click)="themeService.toggle()"
+          [attr.aria-label]="translationService.currentLanguage() === 'uz' ? 'Mavzuni almashtirish' : 'Переключить тему'">
+          <img [src]="themeIcon()" alt="" class="theme-icon">
+        </button>
+
         <div class="language-switcher">
           <button 
             class="lang-btn" 

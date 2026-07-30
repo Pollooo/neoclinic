@@ -8,6 +8,57 @@
   --btn-font-weight: 600;
   --btn-font-size: 0.9375rem;
   --btn-letter-spacing: 0.01em;
+
+  /* Theme colors */
+  --bg-page: #f9fafb;
+  --bg-card: #ffffff;
+  --bg-header: #ffffff;
+  --bg-input: #ffffff;
+  --bg-subtle: #f3f4f6;
+  --bg-hover: #f9fafb;
+  --bg-section: #f8fafc;
+  --bg-code: #f3f4f6;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-label: #374151;
+  --border-color: #e5e7eb;
+  --border-light: #f3f4f6;
+  --hover-bg: #f3f4f6;
+  --skeleton-from: #f3f4f6;
+  --skeleton-to: #e9ecef;
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #888;
+  --scrollbar-thumb-hover: #555;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg-page: #0f172a;
+  --bg-card: #1e293b;
+  --bg-header: #1e293b;
+  --bg-input: #334155;
+  --bg-subtle: #1e293b;
+  --bg-hover: #1e293b;
+  --bg-section: #0f172a;
+  --bg-code: #334155;
+  --text-primary: #f1f5f9;
+  --text-label: #cbd5e1;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --border-light: #1e293b;
+  --hover-bg: #334155;
+  --skeleton-from: #334155;
+  --skeleton-to: #475569;
+  --scrollbar-track: #1e293b;
+  --scrollbar-thumb: #475569;
+  --scrollbar-thumb-hover: #64748b;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -20,8 +71,8 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #1f2937;
-  background: #ffffff;
+  color: var(--text-primary);
+  background: var(--bg-page);
 }
 
 html, body {
@@ -119,7 +170,7 @@ input, textarea, select {
 /* Base shimmer class – apply to any block element */
 .sk {
   display: block;
-  background: linear-gradient(90deg, #f3f4f6 0%, #e9ecef 40%, #f3f4f6 100%);
+  background: linear-gradient(90deg, var(--skeleton-from) 0%, var(--skeleton-to) 40%, var(--skeleton-from) 100%);
   background-size: 800px 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 6px;
@@ -243,14 +294,14 @@ input, textarea, select {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--scrollbar-thumb);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--scrollbar-thumb-hover);
 }

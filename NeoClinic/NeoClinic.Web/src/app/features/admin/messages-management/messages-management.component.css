@@ -13,25 +13,25 @@
 .page-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .loading,
 .empty-state {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 4rem 2rem;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  color: #6b7280;
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
 }
 
 .empty-state > svg {
   width: 64px;
   height: 64px;
   margin: 0 auto 1rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .empty-state p {
@@ -43,7 +43,7 @@
 .empty-state small {
   display: block;
   margin-bottom: 2rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .empty-state .btn {
@@ -58,10 +58,10 @@
 }
 
 .contact-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md);
 }
 
 .info-section {
@@ -75,10 +75,10 @@
 .section-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .info-grid {
@@ -99,14 +99,14 @@
 
 .info-item label {
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .info-item p {
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0;
   font-size: 1rem;
   word-break: break-word;
@@ -138,7 +138,7 @@
   gap: 1rem;
   justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 2px solid #e5e7eb;
+  border-top: 2px solid var(--border-color);
 }
 
 .form-group {
@@ -149,13 +149,13 @@
 
 .form-group label {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-label);
   font-size: 0.875rem;
 }
 
 .input {
   padding: 0.75rem 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.2s;
@@ -174,13 +174,13 @@
 }
 
 .btn-secondary {
-  background: #fff;
-  color: #6b7280;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #f9fafb;
+  background: var(--bg-hover);
 }
 
 @media (max-width: 768px) {

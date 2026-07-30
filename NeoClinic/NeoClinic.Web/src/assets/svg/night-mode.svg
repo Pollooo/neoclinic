@@ -1,0 +1,24 @@
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <radialGradient id="moonGlow" cx="40%" cy="40%" r="80%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+            <stop offset="70%" stop-color="#ffffff" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="moonShade" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.6"/>
+        </linearGradient>
+    </defs>
+    <circle cx="40" cy="40" r="28" fill="url(#moonGlow)"/>
+    <path d="M54 16
+             A28 28 0 1 0 54 64
+             A18 18 0 1 1 54 16Z"
+          fill="url(#moonShade)"/>
+    <path d="M45 18
+             C37 18 30 26 30 36
+             C30 46 38 54 46 56
+             C42 54 36 48 36 36
+             C36 26 42 18 45 18Z"
+          fill="#ffffff" opacity="0.12"/>
+</svg>

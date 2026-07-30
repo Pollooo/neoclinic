@@ -1,11 +1,16 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslationService } from '../../../core/services/translation.service';
 import { LocalStorageService } from '../../../core/services/local-storage.service';
 import { ApiService } from '../../../core/services/api.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { GetContactMessageResponse } from '../../../core/models/response-models/contact-message-response.model';
 import { NotificationComponent } from '../../../shared/components/notification/notification.component';
+import { lightModeIcon } from '../../../shared/svg/light-mode';
+import { nightModeIcon } from '../../../shared/svg/night-mode';
+
 
 @Component({
   selector: 'app-admin-layout',
@@ -19,6 +24,16 @@ export class AdminLayoutComponent implements OnInit {
   private localStorageService = inject(LocalStorageService);
   private apiService = inject(ApiService);
   private router = inject(Router);
+  public themeService = inject(ThemeService);
+  private sanitizer = inject(DomSanitizer);
+
+  public themeIcon = computed(() => {
+    const svg = this.themeService.currentTheme() === 'light' ? nightModeIcon : lightModeIcon;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      'data:image/svg+xml,' + encodeURIComponent(svg)
+    );
+  });
+
 
   public sidebarOpen = signal(false);
   public contactInfo = signal<GetContactMessageResponse | null>(null);

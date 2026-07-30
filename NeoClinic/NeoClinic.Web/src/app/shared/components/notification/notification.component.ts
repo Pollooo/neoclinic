@@ -94,13 +94,10 @@ import { NotificationService } from '../../../core/services/notification.service
       gap: 12px;
       padding: 14px 14px 18px 14px;
       border-radius: 12px;
-      background: rgba(255, 255, 255, 0.97);
+      background: var(--bg-card);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      box-shadow:
-        0 4px 24px rgba(0, 0, 0, 0.10),
-        0 1px 6px rgba(0, 0, 0, 0.06),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+      box-shadow: var(--shadow-lg);
       animation: notifIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
       cursor: pointer;
       overflow: hidden;
@@ -109,9 +106,7 @@ import { NotificationService } from '../../../core/services/notification.service
 
     .notif:hover {
       transform: translateX(-3px) translateY(-1px);
-      box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.13),
-        0 2px 8px rgba(0, 0, 0, 0.07);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
 
     @keyframes notifIn {
@@ -168,7 +163,7 @@ import { NotificationService } from '../../../core/services/notification.service
       margin: 0;
       font-size: 13.5px;
       line-height: 1.5;
-      color: #1f2937;
+      color: var(--text-primary);
       font-weight: 500;
     }
 
@@ -178,18 +173,18 @@ import { NotificationService } from '../../../core/services/notification.service
       width: 22px;
       height: 22px;
       border: none;
-      background: rgba(0, 0, 0, 0.05);
+      background: rgba(128, 128, 128, 0.1);
       border-radius: 6px;
       cursor: pointer;
       padding: 3px;
-      color: #6b7280;
+      color: var(--text-secondary);
       transition: background 0.15s, color 0.15s;
       margin-top: 1px;
     }
 
     .notif-close:hover {
-      background: rgba(0, 0, 0, 0.12);
-      color: #111;
+      background: rgba(128, 128, 128, 0.2);
+      color: var(--text-primary);
     }
 
     .notif-close svg {
